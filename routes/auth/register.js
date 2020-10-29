@@ -4,13 +4,13 @@ const express = require('express')
 const crypto = require("crypto")
 
 //Access the connection to Heroku Database
-let pool = require('../utilities/utils').pool
+let pool = require('../../utilities/utils').pool
 
-let getHash = require('../utilities/utils').getHash
+let getHash = require('../../utilities/utils').getHash
 
-let sendEmail = require('../utilities/utils').sendEmail
+let sendEmail = require('../../utilities/utils').sendEmail
 
-var router = express.Router()
+const router = express.Router();
 
 const bodyParser = require("body-parser")
 //This allows parsing of the body of POST requests, that are encoded in JSON
@@ -20,23 +20,23 @@ router.use(bodyParser.json())
  * @api {post} /register Request to resgister a user
  * @apiName PostAuth
  * @apiGroup Auth
- * 
+ *
  * @apiParam {String} first a users first name
  * @apiParam {String} last a users last name
  * @apiParam {String} email a users email *required unique
  * @apiParam {String} password a users password
- * 
+ *
  * @apiSuccess (Success 201) {boolean} success true when the name is inserted
- * @apiSuccess (Success 201) {String} email the email of the user inserted 
- * 
+ * @apiSuccess (Success 201) {String} email the email of the user inserted
+ *
  * @apiError (400: Missing Parameters) {String} message "Missing required information"
- * 
+ *
  * @apiError (400: Username exists) {String} message "Username exists"
- * 
+ *
  * @apiError (400: Email exists) {String} message "Email exists"
- * 
+ *
  * @apiError (400: SQL Error) {String} message the reported SQL error details
- */ 
+ */
 router.post('/', (req, res) => {
     res.type("application/json")
 
@@ -44,14 +44,14 @@ router.post('/', (req, res) => {
     var first = req.body.first
     var last = req.body.last
     //TODO add userNAME
-    var username = req.body.email 
+    var username = req.body.email
     var email = req.body.email
     var password = req.body.password
 
     if(first && last && username && email && password) {
         let salt = crypto.randomBytes(32).toString("hex")
         let salted_hash = getHash(password, salt)
-        
+
         let theQuery = "INSERT INTO MEMBERS(FirstName, LastName, Username, Email, Password, Salt) VALUES ($1, $2, $3, $4, $5, $6) RETURNING Email"
         let values = [first, last, username, email, salted_hash, salt]
         pool.query(theQuery, values)
