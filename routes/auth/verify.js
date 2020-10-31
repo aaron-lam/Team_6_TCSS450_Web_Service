@@ -9,6 +9,15 @@ const router = express.Router()
 
 router.use(express.json())
 
+/**
+ * @api {get} /authentication/{verification_code} Request to verify user
+ * @apiName GetVerification
+ * @apiGroup Verification
+ *
+ * @apiSuccess (Success 202) {boolean} success true when the user was validated
+ *
+ * @apiError (400: Verification code not found) {String} message "Code not found"
+ */
 router.get("/:id", (req, res) => {
     res.type("application/json")
 
