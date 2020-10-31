@@ -44,7 +44,7 @@ router.post('/', (req, res) => {
     var first = req.body.first
     var last = req.body.last
     //TODO add userNAME
-    var username = req.body.email
+    var username = req.body.user
     var email = req.body.email
     var password = req.body.password
 
@@ -60,6 +60,7 @@ router.post('/', (req, res) => {
                     success: true,
                     email: result.rows[0].email
                 })
+                console.log(getHash(email, "hello"))
                 sendEmail("team6.tcss450.uw@gmail.com", email, "Welcome!", "<strong>Welcome to our app!</strong>");
             })
             .catch((err) => {

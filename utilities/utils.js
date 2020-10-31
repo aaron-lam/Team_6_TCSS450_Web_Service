@@ -17,13 +17,13 @@ const transporter = nodemailer.createTransport({
  secure: true,
 })
 
-function sendEmail(from, receiver, subj, message) {
+function sendEmail(from, receiver, code, subj, message) {
  const mailData = {
   from,  // sender address
   to: receiver,   // list of receivers
   subject: subj,
   text: message,
-  html: `<b>Hey there! </b> <br> This is our first message sent with Nodemailer<br/>`,
+  html: `<b>Hey there! </b> <br> This is your code: ${code}<br/>`,
  }
  transporter.sendMail(mailData, (error, info) => console.log(error ? error : info))
 }
