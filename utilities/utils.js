@@ -2,18 +2,30 @@
 let pool = require('./sql_conn.js')
 
 //We use this create the SHA256 hash
-const crypto = require("crypto");
+const crypto = require("crypto")
+
+const nodemailer = require('nodemailer')
+
+// create reusable transporter object using the default SMTP transport
+const transporter = nodemailer.createTransport({
+ port: 465,
+ host: "smtp.gmail.com",
+ auth: {
+  user: process.env.SENDER_EMAIL,
+  pass: process.env.SENDER_EMAIL_PASSWORD,
+ },
+ secure: true,
+})
 
 function sendEmail(from, receiver, subj, message) {
- //research nodemailer for sending email from node.
- // https://nodemailer.com/about/
- // https://www.w3schools.com/nodejs/nodejs_email.asp
- //create a burner gmail account
- //make sure you add the password to the environmental variables
- //similar to the DATABASE_URL and PHISH_DOT_NET_KEY (later section of the lab)
-
- //fake sending an email for now. Post a message to logs.
- console.log('Email sent: ' + message);
+ const mailData = {
+  from,  // sender address
+  to: receiver,   // list of receivers
+  subject: subj,
+  text: message,
+  html: `<b>Hey there! </b> <br> This is our first message sent with Nodemailer<br/>`,
+ }
+ transporter.sendMail(mailData, (error, info) => console.log(error ? error : info))
 }
 
 /**
@@ -23,10 +35,10 @@ function sendEmail(from, receiver, subj, message) {
  * @param {string} salt the salt to use when hashing
  */
 function getHash(pw, salt) {
- return crypto.createHash("sha256").update(pw + salt).digest("hex");
-} 
+ return crypto.createHash("sha256").update(pw + salt).digest("hex")
+}
 
 
 module.exports = {
  pool, getHash, sendEmail
-} 
+}
