@@ -51,7 +51,7 @@ router.post('/', (req, res) => {
     if(first && last && username && email && password) {
         let salt = crypto.randomBytes(32).toString("hex")
         let salted_hash = getHash(password, salt)
-        
+
         let verification_code = getHash(email, "hello");
 
         let theQuery = "INSERT INTO MEMBERS(FirstName, LastName, Username, Email, Password, Verification_Code, Salt) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING Email, Verification_Code"
@@ -81,7 +81,7 @@ router.post('/', (req, res) => {
                 }
             })
     } else {
-        response.status(400).send({
+        res.status(400).send({
             message: "Missing required information"
         })
     }
