@@ -51,17 +51,19 @@ router.post('/', (req, res) => {
     if(first && last && username && email && password) {
         let salt = crypto.randomBytes(32).toString("hex")
         let salted_hash = getHash(password, salt)
+        
+        let verification_code = getHash(email, "hello");
 
-        let theQuery = "INSERT INTO MEMBERS(FirstName, LastName, Username, Email, Password, Salt) VALUES ($1, $2, $3, $4, $5, $6) RETURNING Email"
-        let values = [first, last, username, email, salted_hash, salt]
+        let theQuery = "INSERT INTO MEMBERS(FirstName, LastName, Username, Email, Password, Verification_Code, Salt) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING Email, Verification_Code"
+        let values = [first, last, username, email, salted_hash, verification_code, salt]
         pool.query(theQuery, values)
             .then(result => {
                 res.status(201).send({
                     success: true,
                     email: result.rows[0].email
                 })
-                console.log(getHash(email, "hello"))
-                sendEmail("team6.tcss450.uw@gmail.com", email, "Welcome!", "<strong>Welcome to our app!</strong>");
+                let verification = result.rows[0].verification_code
+                sendEmail("team6.tcss450.uw@gmail.com", email, verification, "Welcome!", "<strong>Welcome to our app!</strong>");
             })
             .catch((err) => {
                 if (err.constraint == "members_username_key") {
