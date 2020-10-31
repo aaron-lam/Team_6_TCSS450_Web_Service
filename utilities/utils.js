@@ -8,24 +8,32 @@ const nodemailer = require('nodemailer')
 
 // create reusable transporter object using the default SMTP transport
 const transporter = nodemailer.createTransport({
- port: 465,
- host: "smtp.gmail.com",
- auth: {
-  user: process.env.SENDER_EMAIL,
-  pass: process.env.SENDER_PASSWORD,
- },
- secure: true,
+    port: 465,
+    host: "smtp.gmail.com",
+    auth: {
+        user: process.env.SENDER_EMAIL,
+        pass: process.env.SENDER_PASSWORD,
+    },
+    secure: true,
 })
 
-function sendEmail(from, receiver, subj, message) {
- const mailData = {
-  from,  // sender address
-  to: receiver,   // list of receivers
-  subject: subj,
-  text: message,
-  html: `<b>Hey there! </b> <br> This is our first message sent with Nodemailer<br/>`,
- }
- transporter.sendMail(mailData, (error, info) => console.log(error ? error : info))
+function sendEmail(from, receiver, code, subj, message) {
+
+    //production email 
+    const messageContents = `<b>Hey there! </b> <br> https://team6-tcss450-web-service.herokuapp.com/verification/${code}<br/>`
+
+    //development heroku local email
+    //const messageContents = `<b>Hey there! </b> <br> https://localhost:5000/verification/${code}<br/>`
+
+
+    const mailData = {
+        from,  // sender address
+        to: receiver,   // list of receivers
+        subject: subj,
+        text: message,
+        html: messageContents
+    }
+    transporter.sendMail(mailData, (error, info) => console.log(error ? error : info))
 }
 
 /**
@@ -35,10 +43,10 @@ function sendEmail(from, receiver, subj, message) {
  * @param {string} salt the salt to use when hashing
  */
 function getHash(pw, salt) {
- return crypto.createHash("sha256").update(pw + salt).digest("hex")
+    return crypto.createHash("sha256").update(pw + salt).digest("hex")
 }
 
 
 module.exports = {
- pool, getHash, sendEmail
+    pool, getHash, sendEmail
 }
