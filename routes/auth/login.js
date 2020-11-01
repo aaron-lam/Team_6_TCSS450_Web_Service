@@ -45,7 +45,7 @@ router.get('/', (request, response) => {
   const [email, theirPw] = credentials.split(':')
 
   if(email && theirPw) {
-    let theQuery = "SELECT Password, Salt, MemberId FROM Members WHERE Email=$1"
+    let theQuery = "SELECT Password, Salt, MemberId, Verification FROM Members WHERE Email=$1"
     let values = [email]
     pool.query(theQuery, values)
       .then(result => {
@@ -64,23 +64,32 @@ router.get('/', (request, response) => {
 
         //Did our salted hash match their salted hash?
         if (ourSaltedHash === theirSaltedHash ) {
-          //credentials match. get a new JWT
-          let token = jwt.sign(
-            {
-              "email": email,
-              memberid: result.rows[0].memberid
-            },
-            config.secret,
-            {
-              expiresIn: '365 days' // expires in 14 days
-            }
-          )
-          //package and send the results
-          response.json({
-            success: true,
-            message: 'Authentication successful!',
-            token: token
-          })
+          const isVerified = result.rows[0].verification
+          // check whether the email is verified or not
+          if (!isVerified) {
+            response.status(400).send({
+              message: 'Email is not verified yet'
+            })
+          }
+          else {
+            //credentials match. get a new JWT
+            let token = jwt.sign(
+              {
+                "email": email,
+                memberid: result.rows[0].memberid
+              },
+              config.secret,
+              {
+                expiresIn: '365 days' // expires in 14 days
+              }
+            )
+            //package and send the results
+            response.json({
+              success: true,
+              message: 'Authentication successful!',
+              token: token
+            })
+          }
         } else {
           //credentials dod not match
           response.status(400).send({
