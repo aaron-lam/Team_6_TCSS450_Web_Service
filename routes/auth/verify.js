@@ -19,17 +19,14 @@ router.use(express.json())
  * @apiError (400: Verification code not found) {String} message "Code not found"
  */
 router.get("/:id", (req, res) => {
-    res.type("application/json")
-
     let theQuery = "UPDATE MEMBERS SET VERIFICATION=1 WHERE VERIFICATION_CODE=$1 RETURNING Email"
     let values = [req.params.id]
 
-    pool.query(theQuery, values) 
-    .then(result => {
-        res.status(202).send({
-            success: true,
-            email: result[0].email
-        })
+    pool.query(theQuery, values)
+    .then(() => {
+        res.statusCode = 202
+        res.setHeader('Content-Type', 'text/html')
+        res.sendFile('views/verification.html', { root: '.' })
     })
     .catch(err => {
         res.status(400).send({
