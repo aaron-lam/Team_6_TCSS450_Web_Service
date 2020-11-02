@@ -1,0 +1,11 @@
+{
+  "name": "Team 6 TCSS 450 Web Service",
+  "version": "0.1.0",
+  "description": "Team 6 TCSS 450 Web Service API Documentation",
+  "title": "Lab 4 API Doc",
+  "url" : "https://team6-tcss450-web-service.herokuapp.com/",
+  "order": [
+    "Auth",
+    "Verify"
+  ]
+}
