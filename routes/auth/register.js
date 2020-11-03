@@ -6,9 +6,10 @@ const crypto = require("crypto")
 //Access the connection to Heroku Database
 let pool = require('../../utilities/utils').pool
 
+//Utility functions
 let getHash = require('../../utilities/utils').getHash
-
 let sendEmail = require('../../utilities/utils').sendEmail
+let validateEmail = require('../../utilities/email_validator')
 
 const router = express.Router();
 
@@ -49,6 +50,16 @@ router.post('/', (req, res) => {
     var password = req.body.password
 
     if(first && last && username && email && password) {
+        
+        //if there is an error with the format of the email send it and exit
+        let validEmail = validateEmail(email)
+        if(validEmail) {
+            return res.status(400).send({
+                message: validEmail
+            })
+        }
+
+        
         let salt = crypto.randomBytes(32).toString("hex")
         let salted_hash = getHash(password, salt)
 
