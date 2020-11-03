@@ -23,10 +23,18 @@ router.get("/:id", (req, res) => {
     let values = [req.params.id]
 
     pool.query(theQuery, values)
-    .then(() => {
-        res.statusCode = 202
-        res.setHeader('Content-Type', 'text/html')
-        res.sendFile('views/verification.html', { root: '.' })
+    .then((result) => {
+        // if no result is found
+        if (!result.rows.length) {
+            res.status(400).send({
+                message: "The verification URL is invalid."
+            })
+        }
+        else {
+            res.statusCode = 202
+            res.setHeader('Content-Type', 'text/html')
+            res.sendFile('views/verification.html', { root: '.' })
+        }
     })
     .catch(err => {
         res.status(400).send({
