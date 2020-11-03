@@ -14,7 +14,7 @@ function validateEmail(email) {
     illegalChars = ['+', '"', ",", " "]
     
     illegalChars.forEach(char => {
-        if(domain.includes(char)) return `${char} cannot be present before @`
+        if(local.includes(char)) return `${char} cannot be present before @`
     })
 
     if(!domain.includes('.')) return 'Domain must contain a period'
