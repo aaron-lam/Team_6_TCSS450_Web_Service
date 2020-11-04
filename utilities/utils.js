@@ -19,8 +19,8 @@ const transporter = nodemailer.createTransport({
 
 function sendEmail(from, receiver, code, subj, message) {
 
-    //production email 
-    const messageContents = `<b>Hey there! </b> <br> https://team6-tcss450-web-service.herokuapp.com/verification/${code}<br/>`
+    //production email
+    const messageContents = `<b>Hey there! Click this link to verify your email: </b> <br> https://team6-tcss450-web-service.herokuapp.com/verification/${code}<br/>`
 
     //development heroku local email
     //const messageContents = `<b>Hey there! </b> <br> https://localhost:5000/verification/${code}<br/>`

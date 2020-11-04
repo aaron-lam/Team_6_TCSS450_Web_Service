@@ -24,6 +24,7 @@ router.use(bodyParser.json())
  *
  * @apiParam {String} first a users first name
  * @apiParam {String} last a users last name
+ * @apiParam {String} user a username
  * @apiParam {String} email a users email *required unique
  * @apiParam {String} password a users password
  *
@@ -50,7 +51,7 @@ router.post('/', (req, res) => {
     var password = req.body.password
 
     if(first && last && username && email && password) {
-        
+
         //if there is an error with the format of the email send it and exit
         let validEmail = validateEmail(email)
         if(validEmail) {
@@ -59,7 +60,7 @@ router.post('/', (req, res) => {
             })
         }
 
-        
+
         let salt = crypto.randomBytes(32).toString("hex")
         let salted_hash = getHash(password, salt)
 
