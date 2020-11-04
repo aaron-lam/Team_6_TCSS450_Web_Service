@@ -9,7 +9,8 @@ let pool = require('../../utilities/utils').pool
 //Utility functions
 let getHash = require('../../utilities/utils').getHash
 let sendEmail = require('../../utilities/utils').sendEmail
-let validateEmail = require('../../utilities/email_validator')
+let validateEmail = require('../../utilities/validator').validateEmail
+let validatePassword = require('../../utilities/validator').validatePassword
 
 const router = express.Router();
 
@@ -53,13 +54,19 @@ router.post('/', (req, res) => {
     if(first && last && username && email && password) {
 
         //if there is an error with the format of the email send it and exit
-        let validEmail = validateEmail(email)
-        if(validEmail) {
+        let emailError = validateEmail(email)
+        if(emailError) {
             return res.status(400).send({
-                message: validEmail
+                message: emailError
             })
         }
 
+        let passwordError = validatePassword(password)
+        if(passwordError) {
+            return res.status(400).send({
+                message: passwordError
+            })
+        }
 
         let salt = crypto.randomBytes(32).toString("hex")
         let salted_hash = getHash(password, salt)
