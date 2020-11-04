@@ -9,6 +9,9 @@ let pool = require('../../utilities/utils').pool
 //Utility functions
 let getHash = require('../../utilities/utils').getHash
 let sendEmail = require('../../utilities/utils').sendEmail
+
+//Verification functions
+let validateName = require('../../utilities/validator').validateName
 let validateEmail = require('../../utilities/validator').validateEmail
 let validatePassword = require('../../utilities/validator').validatePassword
 
@@ -52,18 +55,10 @@ router.post('/', (req, res) => {
 
     if(first && last && username && email && password) {
 
-        //if there is an error with the format of the email send it and exit
-        let emailError = validateEmail(email)
-        if(emailError) {
+        let inputError = validateInput(first, last, username, email, password);
+        if(inputError) {
             return res.status(400).send({
-                message: emailError
-            })
-        }
-
-        let passwordError = validatePassword(password)
-        if(passwordError) {
-            return res.status(400).send({
-                message: passwordError
+                message: inputError
             })
         }
 
@@ -104,5 +99,24 @@ router.post('/', (req, res) => {
         })
     }
 })
+
+function validateInput(first, last, username, email, password) {
+
+    let firstError = validateName(first, "First Name")
+    if(firstError) return firstError
+
+    let lastError = validateName(last, "Last Name")
+    if(lastError) return lastError
+    
+    let userError = validateName(username, "Username")
+    if(userError) return userError
+
+    let emailError = validateEmail(email)
+    if(emailError) return emailError
+
+    let passwordError = validatePassword(password)
+    if(passwordError) return passwordError
+
+}
 
 module.exports = router
