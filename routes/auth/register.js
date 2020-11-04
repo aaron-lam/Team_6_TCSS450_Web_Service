@@ -46,7 +46,6 @@ router.post('/', (req, res) => {
     //Retrieve data from query params
     var first = req.body.first
     var last = req.body.last
-    //TODO add userNAME
     var username = req.body.user
     var email = req.body.email
     var password = req.body.password
@@ -71,7 +70,7 @@ router.post('/', (req, res) => {
         let salt = crypto.randomBytes(32).toString("hex")
         let salted_hash = getHash(password, salt)
 
-        let verification_code = getHash(email, "hello");
+        let verification_code = getHash(email, process.env.EMAIL_SALT);
 
         let theQuery = "INSERT INTO MEMBERS(FirstName, LastName, Username, Email, Password, Verification_Code, Salt) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING Email, Verification_Code"
         let values = [first, last, username, email, salted_hash, verification_code, salt]
