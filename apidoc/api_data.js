@@ -91,7 +91,7 @@ define({ "api": [
   },
   {
     "type": "post",
-    "url": "/register",
+    "url": "/auth",
     "title": "Request to resgister a user",
     "name": "PostAuth",
     "group": "Auth",
@@ -202,7 +202,7 @@ define({ "api": [
   },
   {
     "type": "get",
-    "url": "/authentication/{verification_code}",
+    "url": "/verification/{verification_code}",
     "title": "Request to verify user",
     "name": "GetVerification",
     "group": "Verification",
