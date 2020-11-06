@@ -10,7 +10,7 @@ const router = express.Router()
 router.use(express.json())
 
 /**
- * @api {get} /authentication/{verification_code} Request to verify user
+ * @api {get} /verification/{verification_code} Request to verify user
  * @apiName GetVerification
  * @apiGroup Verification
  *
