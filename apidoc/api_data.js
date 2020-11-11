@@ -201,6 +201,186 @@ define({ "api": [
     "groupTitle": "Auth"
   },
   {
+    "type": "post",
+    "url": "/password",
+    "title": "Request to change a password",
+    "name": "PostAuth",
+    "group": "Password",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "email",
+            "description": "<p>a users email</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "password",
+            "description": "<p>a users current password</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 201": [
+          {
+            "group": "Success 201",
+            "type": "boolean",
+            "optional": false,
+            "field": "success",
+            "description": "<p>true when password is changed</p>"
+          },
+          {
+            "group": "Success 201",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>success message</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "400: Missing Parameters": [
+          {
+            "group": "400: Missing Parameters",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;Missing required information&quot;</p>"
+          }
+        ],
+        "400: Credentials not match": [
+          {
+            "group": "400: Credentials not match",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;Credentials not match&quot;</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/auth/password/change_password.js",
+    "groupTitle": "Password"
+  },
+  {
+    "type": "get",
+    "url": "/password/reset",
+    "title": "Request to reset a password",
+    "name": "getPasswordReset",
+    "group": "Password",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "email",
+            "description": "<p>a users email</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "password",
+            "description": "<p>a users current password</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 201": [
+          {
+            "group": "Success 201",
+            "type": "boolean",
+            "optional": false,
+            "field": "success",
+            "description": "<p>true when the reset password url is sent</p>"
+          },
+          {
+            "group": "Success 201",
+            "type": "String",
+            "optional": false,
+            "field": "email",
+            "description": "<p>the email of the account that need to reset password</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "400: Missing Parameters": [
+          {
+            "group": "400: Missing Parameters",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;Missing required information&quot;</p>"
+          }
+        ],
+        "400: Email not exists": [
+          {
+            "group": "400: Email not exists",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;Email not exists&quot;</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/auth/password/reset_password.js",
+    "groupTitle": "Password"
+  },
+  {
+    "type": "get",
+    "url": "/password/reset/:verification",
+    "title": "Request to render \"reset password\" web page",
+    "name": "getPasswordResetVerification",
+    "group": "Password",
+    "success": {
+      "fields": {
+        "Success 202": [
+          {
+            "group": "Success 202",
+            "type": "boolean",
+            "optional": false,
+            "field": "success",
+            "description": "<p>true when the verification code is valid</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "404: Verification code not found": [
+          {
+            "group": "404: Verification code not found",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;The reset password URL is invalid&quot;</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/auth/password/reset_password.js",
+    "groupTitle": "Password"
+  },
+  {
     "type": "get",
     "url": "/verification/{verification_code}",
     "title": "Request to verify user",

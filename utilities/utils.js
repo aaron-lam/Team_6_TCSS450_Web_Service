@@ -17,21 +17,13 @@ const transporter = nodemailer.createTransport({
     secure: true,
 })
 
-function sendEmail(from, receiver, code, subj, message) {
-
-    //production email
-    const messageContents = `<b>Hey there! Click this link to verify your email: </b> <br> https://team6-tcss450-web-service.herokuapp.com/verification/${code}<br/>`
-
-    //development heroku local email
-    //const messageContents = `<b>Hey there! </b> <br> https://localhost:5000/verification/${code}<br/>`
-
-
+function sendEmail(from, receiver, subj, message) {
     const mailData = {
         from,  // sender address
         to: receiver,   // list of receivers
         subject: subj,
-        text: message,
-        html: messageContents
+        text: subj,
+        html: message
     }
     transporter.sendMail(mailData, (error, info) => console.log(error ? error : info))
 }
