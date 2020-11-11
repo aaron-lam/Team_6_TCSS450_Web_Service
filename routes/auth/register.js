@@ -76,7 +76,7 @@ router.post('/', (req, res) => {
                     email: result.rows[0].email
                 })
                 let verification = result.rows[0].verification_code
-                sendEmail("team6.tcss450.uw@gmail.com", email, verification, "Welcome!", "<strong>Welcome to our app!</strong>");
+                sendEmail("team6.tcss450.uw@gmail.com", email, "Welcome!", `<b>Hey there! Click this link to verify your email: </b> <br> https://team6-tcss450-web-service.herokuapp.com/verification/${verification}<br/>`);
             })
             .catch((err) => {
                 if (err.constraint == "members_username_key") {
@@ -107,7 +107,7 @@ function validateInput(first, last, username, email, password) {
 
     let lastError = validateName(last, "Last Name")
     if(lastError) return lastError
-    
+
     let userError = validateName(username, "Username")
     if(userError) return userError
 
