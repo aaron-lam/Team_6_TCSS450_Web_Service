@@ -17,14 +17,11 @@ router.use(bodyParser.json());
  * @apiGroup Password
  *
  * @apiParam {String} email  a users email
- * @apiParam {String} password a users current password
- * @apiParam {String} password a users new password
  *
  * @apiSuccess (Success 201) {boolean} success true when the reset password url is sent
  * @apiSuccess (Success 201) {String} email the email of the account that need to reset password
  *
  * @apiError (400: Missing Parameters) {String} message "Missing required information"
- *
  * @apiError (400: Email not exists) {String} message "Email not exists"
  */
 router.get('/', (req, res) => {
