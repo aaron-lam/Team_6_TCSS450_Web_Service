@@ -25,7 +25,9 @@ router.use(bodyParser.json());
  * @apiError (400: Email not exists) {String} message "Email not exists"
  */
 router.get('/', (req, res) => {
-  const email = req.body.email;
+  
+  const email = req.headers.email;
+
   if (email) {
     const theQuery = "SELECT Verification_Code FROM Members WHERE Email=$1";
     const values = [email];
