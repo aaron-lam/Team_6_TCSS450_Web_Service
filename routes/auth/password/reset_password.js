@@ -35,7 +35,7 @@ router.get('/', (req, res) => {
             message: "Email does not exist"
           });
         } else if (!result.rows[0].verification) {
-          response.status(400).send({
+          res.status(400).send({
             success: false,
             message: "Email is not verified yet"
           })
