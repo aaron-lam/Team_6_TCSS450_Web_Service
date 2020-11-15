@@ -29,14 +29,12 @@ router.get('/', (req, res) => {
     pool.query(theQuery, values)
       .then(result => {
 
-        const isVerified = result.rows[0].verification
-
         if (result.rows.length === 0) {
           res.status(404).send({
             success: false,
             message: "Email not existed"
           });
-        } else if (!isVerified) {
+        } else if (result.rows[0].verification) {
           response.status(400).send({
             success: false,
             message: "Email is not verified yet"
