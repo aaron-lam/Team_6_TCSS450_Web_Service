@@ -4,12 +4,7 @@ const pool = require('../../../utilities/utils').pool;
 
 const router = express.Router();
 
-const bodyParser = require("body-parser");
-
 const { sendEmail } = require("../../../utilities/utils");
-
-//This allows parsing of the body of POST requests, that are encoded in JSON
-router.use(bodyParser.json());
 
 /**
  * @api {get} /password/reset Request to reset a password
@@ -25,7 +20,7 @@ router.use(bodyParser.json());
  * @apiError (400: Email not exists) {String} message "Email not exists"
  */
 router.get('/', (req, res) => {
-  
+
   const email = req.headers.email;
 
   if (email) {
