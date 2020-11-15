@@ -21,7 +21,7 @@ const { sendEmail } = require("../../../utilities/utils");
  */
 router.get('/', (req, res) => {
 
-  const email = req.headers.email;
+  const email = req.headers.get('email');
 
   if (email) {
     const theQuery = "SELECT Verification_Code FROM Members WHERE Email=$1";
