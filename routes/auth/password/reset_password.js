@@ -32,9 +32,9 @@ router.get('/', (req, res) => {
         if (result.rows.length === 0) {
           res.status(404).send({
             success: false,
-            message: "Email not existed"
+            message: "Email does not exist"
           });
-        } else if (result.rows[0].verification) {
+        } else if (!result.rows[0].verification) {
           response.status(400).send({
             success: false,
             message: "Email is not verified yet"
