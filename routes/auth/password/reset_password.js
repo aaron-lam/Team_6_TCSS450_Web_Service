@@ -29,13 +29,19 @@ router.get('/', (req, res) => {
     const values = [email];
     pool.query(theQuery, values)
       .then(result => {
+
+        const isVerified = result.rows[0].verification
+        
         if (result.rows.length === 0) {
           res.status(404).send({
             success: false,
             message: "Email not existed"
           });
-        }
-        else {
+        } else if (!isVerified) {
+          response.status(400).send({
+            message: 'Email is not verified yet'
+          })
+        } else {
           const verification = result.rows[0].verification_code;
           res.status(201).send({
             success: true,
