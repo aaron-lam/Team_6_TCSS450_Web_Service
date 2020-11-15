@@ -22,10 +22,9 @@ const { sendEmail } = require("../../../utilities/utils");
 router.get('/', (req, res) => {
 
   const email = req.query.email;
-  console.log(email);
 
   if (email) {
-    const theQuery = "SELECT Verification_Code FROM Members WHERE Email=$1";
+    const theQuery = "SELECT Verification_Code, Verification FROM Members WHERE Email=$1";
     const values = [email];
     pool.query(theQuery, values)
       .then(result => {
