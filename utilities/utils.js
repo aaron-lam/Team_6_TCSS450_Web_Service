@@ -6,6 +6,8 @@ const crypto = require("crypto")
 
 const nodemailer = require('nodemailer')
 
+let messaging = require('./pushy_utilities.js')
+
 // create reusable transporter object using the default SMTP transport
 const transporter = nodemailer.createTransport({
     port: 465,
@@ -50,5 +52,7 @@ function parseWeather(weatherData) {
 
 
 module.exports = {
-    pool, getHash, sendEmail, parseWeather
+
+    pool, getHash, sendEmail, messaging, parseWeather
+
 }

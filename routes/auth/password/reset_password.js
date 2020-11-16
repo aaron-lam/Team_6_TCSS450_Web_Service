@@ -22,20 +22,24 @@ const { sendEmail } = require("../../../utilities/utils");
 router.get('/', (req, res) => {
 
   const email = req.query.email;
-  console.log(email);
 
   if (email) {
-    const theQuery = "SELECT Verification_Code FROM Members WHERE Email=$1";
+    const theQuery = "SELECT Verification_Code, Verification FROM Members WHERE Email=$1";
     const values = [email];
     pool.query(theQuery, values)
       .then(result => {
+
         if (result.rows.length === 0) {
           res.status(404).send({
             success: false,
-            message: "Email not existed"
+            message: "Email does not exist"
           });
-        }
-        else {
+        } else if (!result.rows[0].verification) {
+          res.status(400).send({
+            success: false,
+            message: "Email is not verified yet"
+          })
+        } else {
           const verification = result.rows[0].verification_code;
           res.status(201).send({
             success: true,
