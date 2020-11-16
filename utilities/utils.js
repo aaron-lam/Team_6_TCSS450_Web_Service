@@ -38,7 +38,13 @@ function getHash(pw, salt) {
     return crypto.createHash("sha256").update(pw + salt).digest("hex")
 }
 
+function parseWeather(weatherData) {
+    let days = { 0:'Sun ', 1:'Mon ', 2:'Tue ', 3:'Wed ', 4:'Th ', 5:'Fri ', 6:'Sat '}
+    let time = new Date(weatherData.dt * 1000)
+    return {day: days[time.getDay()] + time.getDay, temp: weatherData.temp.day}    
+}
+
 
 module.exports = {
-    pool, getHash, sendEmail
+    pool, getHash, sendEmail, parseWeather
 }
