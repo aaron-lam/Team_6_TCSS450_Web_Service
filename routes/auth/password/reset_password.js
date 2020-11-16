@@ -40,6 +40,10 @@ router.get('/', (req, res) => {
             message: "Email is not verified yet"
           })
         } else {
+          // set reset password flag to 1
+          let theQuery = "UPDATE MEMBERS SET ResetPassword=1 WHERE Email=$1";
+          pool.query(theQuery, [email]);
+          // send success response
           const verification = result.rows[0].verification_code;
           res.status(201).send({
             success: true,
@@ -77,21 +81,16 @@ router.get('/', (req, res) => {
  * @apiError (404: Verification code not found) {String} message "The reset password URL is invalid"
  */
 router.get('/:verification', (req, res) => {
-  const theQuery = "SELECT Email FROM Members WHERE Verification_Code=$1";
+  const theQuery = "SELECT Email, ResetPassword FROM Members WHERE Verification_Code=$1";
   const values = [req.params.verification];
   pool.query(theQuery, values)
     .then(result => {
-      if (result.rows.length === 0) {
-        res.status(404).send({
-          success: false,
-          message: "The reset password URL is invalid"
-        });
-      }
-      else {
         res.statusCode = 202;
         res.setHeader('Content-Type', 'text/html');
-        res.sendFile('views/reset_password.html', { root: '.' })
-      }
+        const htmlFilePath = result.rows.length !== 0 && result.rows[0].resetpassword === 1
+          ? 'views/reset_password.html'
+          : 'views/reset_password_invalid.html';
+          res.sendFile(htmlFilePath, { root: '.' });
     })
     .catch((err) => {
       res.status(400).send({
