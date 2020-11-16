@@ -21,10 +21,14 @@ router.get('/location', (req, res) => {
         axios.get(
             `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${long}&exclude=${excludeParams}&units=imperial&appid=${process.env.WEATHER_KEY}`)
         .then(weatherRes => {
-            console.log("Weather: " + weatherRes);
-            temperatures.push({day: 'Today', temp: weatherRes.current.temp});
+            weatherData = weatherRes.data
+            temperatures.push({
+                day: 'Today',
+                weather: weatherData.current.weather[0].main, 
+                temp: weatherData.current.temp
+            });
             for(let i = 1; i < 7; i++) {
-                temperatures.push(parseWeather(weatherRes.daily[i]));
+                temperatures.push(parseWeather(weatherData.daily[i]));
             }
             res.json({
                 data: temperatures
@@ -33,7 +37,7 @@ router.get('/location', (req, res) => {
         .catch(error => {
             console.log(error);
             res.status(400).send({
-                message: "Error occured"
+                message: error
             })
         }) 
     } else {
