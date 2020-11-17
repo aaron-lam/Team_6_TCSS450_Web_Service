@@ -202,6 +202,116 @@
   },
   {
     "type": "post",
+    "url": "/contacts",
+    "title": "Request to add a contact to the user's contact list",
+    "name": "PostContacts",
+    "group": "Contacts",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "user1Id",
+            "description": "<p>the userId of the user adding the contact</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "user2Id",
+            "description": "<p>the userId of the contact to be added</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "boolean",
+            "optional": false,
+            "field": "success",
+            "description": "<p>true when the contact is added</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "400: Duplicate contact": [
+          {
+            "group": "400: Duplicate contact",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;Contact already exists&quot;</p>"
+          }
+        ],
+        "400: Missing Parameters": [
+          {
+            "group": "400: Missing Parameters",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;Missing required information&quot;</p>"
+          }
+        ],
+        "400: SQL Error": [
+          {
+            "group": "400: SQL Error",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>the reported SQL error details</p>"
+          }
+        ],
+        "400: userId Error": [
+          {
+            "group": "400: userId Error",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;Malformed parameter. userId must be a number&quot;</p>"
+          }
+        ],
+        "400: User userId does not exist": [
+          {
+            "group": "400: User userId does not exist",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;Adding User's ID not found&quot;</p>"
+          }
+        ],
+        "400: Contact userId does not exist": [
+          {
+            "group": "400: Contact userId does not exist",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;Added User's ID not found&quot;</p>"
+          }
+        ],
+        "400: JSON Error": [
+          {
+            "group": "400: JSON Error",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;malformed JSON in parameters&quot;</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/contacts/add_contact.js",
+    "groupTitle": "Contacts"
+  },
+  {
+    "type": "post",
     "url": "/password",
     "title": "Request to change a password",
     "name": "PostAuth",
