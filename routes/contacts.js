@@ -132,7 +132,7 @@ router.post("/", (request, response, next) => {
  * 
  * @apiUse JSONError
  */ 
-router.get("/:contact", (request, response, next) => {
+router.get("/:userId?", (request, response, next) => {
     // Empty parameter operation
     if (!request.params.userId) {
         let query = 'SELECT * FROM CONTACTS WHERE MemberID_A=$1 AND Verified=$2'
@@ -175,7 +175,7 @@ router.get("/:contact", (request, response, next) => {
                 response.status(400).send({
                     message: "User is not a contact",
                 })
-            } else if (result.rows[0].Verified == 0) {
+            } else if (result.rows[0].verified == 0) {
                 response.status(400).send({
                     message: "Contact is not confirmed",
                 })
@@ -201,9 +201,9 @@ router.get("/:contact", (request, response, next) => {
             })
         } else {
             response.send({
-                first: result.rows[0].FirstName,
-                last: result.rows[0].LastName,
-                username: result.rows[0].Username
+                first: result.rows[0].firstname,
+                last: result.rows[0].lastname,
+                username: result.rows[0].username
             })
         }
     }).catch(error => {
@@ -213,8 +213,6 @@ router.get("/:contact", (request, response, next) => {
         })
     })
 })
-
-// Delete NYI, do not use
 
 /**
  * @api {delete} /contacts/:userId? Request to delete a contact
@@ -238,7 +236,7 @@ router.get("/:contact", (request, response, next) => {
  * 
  * @apiUse JSONError
  */
-router.delete("/:contact", (request, response, next) => {
+router.delete("/:userId?", (request, response, next) => {
     // Check for no parameter
     if (!request.params.userId) {
         response.status(400).send({
