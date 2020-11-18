@@ -923,6 +923,357 @@
     "groupTitle": "Chats"
   },
   {
+    "type": "delete",
+    "url": "/contacts/:userId?",
+    "title": "Request to delete a contact",
+    "name": "DeleteContacts",
+    "group": "Contacts",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "authorization",
+            "description": "<p>Valid JSON Web Token JWT</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "userId",
+            "description": "<p>the contact's user ID number</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "boolean",
+            "optional": false,
+            "field": "success",
+            "description": "<p>true when the contact is deleted</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "400: Invalid contact": [
+          {
+            "group": "400: Invalid contact",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;User not found&quot;</p>"
+          }
+        ],
+        "400: Unconfirmed contact": [
+          {
+            "group": "400: Unconfirmed contact",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;User is not a contact&quot;</p>"
+          }
+        ],
+        "400: Missing Parameters": [
+          {
+            "group": "400: Missing Parameters",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;Missing required information&quot;</p>"
+          }
+        ],
+        "400: userId Error": [
+          {
+            "group": "400: userId Error",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;Malformed parameter. userId must be a number&quot;</p>"
+          }
+        ],
+        "400: SQL Error": [
+          {
+            "group": "400: SQL Error",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>the reported SQL error details</p>"
+          }
+        ],
+        "400: JSON Error": [
+          {
+            "group": "400: JSON Error",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;malformed JSON in parameters&quot;</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/contacts.js",
+    "groupTitle": "Contacts"
+  },
+  {
+    "type": "get",
+    "url": "/contacts/:userId?",
+    "title": "Request to view a contact",
+    "name": "GetContacts",
+    "group": "Contacts",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "authorization",
+            "description": "<p>Valid JSON Web Token JWT</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "userId",
+            "description": "<p>(Optional) the contact's user ID number.  If no number provided, all are contacts returned</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "contacts",
+            "description": "<p>List of confirmed contacts associated with the requester</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "first",
+            "description": "<p>requested contact's first name</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "last",
+            "description": "<p>requested contact's last name</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "username",
+            "description": "<p>requested contact's username</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "400: Invalid user": [
+          {
+            "group": "400: Invalid user",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;User not found&quot;</p>"
+          }
+        ],
+        "400: Not a contact": [
+          {
+            "group": "400: Not a contact",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;User is not a contact&quot;</p>"
+          }
+        ],
+        "400: Unconfirmed contact": [
+          {
+            "group": "400: Unconfirmed contact",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;Contact is not confirmed&quot;</p>"
+          }
+        ],
+        "400: Empty contact list": [
+          {
+            "group": "400: Empty contact list",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;No contacts exist&quot;</p>"
+          }
+        ],
+        "400: userId Error": [
+          {
+            "group": "400: userId Error",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;Malformed parameter. userId must be a number&quot;</p>"
+          }
+        ],
+        "400: SQL Error": [
+          {
+            "group": "400: SQL Error",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>the reported SQL error details</p>"
+          }
+        ],
+        "400: JSON Error": [
+          {
+            "group": "400: JSON Error",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;malformed JSON in parameters&quot;</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/contacts.js",
+    "groupTitle": "Contacts"
+  },
+  {
+    "type": "post",
+    "url": "/contacts",
+    "title": "Request to add a contact to the user's contact list",
+    "name": "PostContacts",
+    "group": "Contacts",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "authorization",
+            "description": "<p>Valid JSON Web Token JWT</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "userId",
+            "description": "<p>the userId of the contact to be added</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "boolean",
+            "optional": false,
+            "field": "success",
+            "description": "<p>true when the contact is added</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "400: Duplicate contact": [
+          {
+            "group": "400: Duplicate contact",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;Contact already exists&quot;</p>"
+          }
+        ],
+        "400: Missing Parameters": [
+          {
+            "group": "400: Missing Parameters",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;Missing required information&quot;</p>"
+          }
+        ],
+        "400: SQL Error": [
+          {
+            "group": "400: SQL Error",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>the reported SQL error details</p>"
+          }
+        ],
+        "400: userId Error": [
+          {
+            "group": "400: userId Error",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;Malformed parameter. userId must be a number&quot;</p>"
+          }
+        ],
+        "400: Contact userId does not exist": [
+          {
+            "group": "400: Contact userId does not exist",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;Added User's ID not found&quot;</p>"
+          }
+        ],
+        "400: JSON Error": [
+          {
+            "group": "400: JSON Error",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;malformed JSON in parameters&quot;</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/contacts.js",
+    "groupTitle": "Contacts"
+  },
+  {
     "type": "get",
     "url": "/messages/:chatId?/:messageId?",
     "title": "Request to get chat messages",
