@@ -1,0 +1,2 @@
+ALTER TABLE Members
+ADD COLUMN ResetPassword INT DEFAULT 0;

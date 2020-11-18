@@ -4,12 +4,7 @@ const pool = require('../../../utilities/utils').pool;
 
 const router = express.Router();
 
-const bodyParser = require("body-parser");
-
 const { sendEmail } = require("../../../utilities/utils");
-
-//This allows parsing of the body of POST requests, that are encoded in JSON
-router.use(bodyParser.json());
 
 /**
  * @api {get} /password/reset Request to reset a password
@@ -17,30 +12,38 @@ router.use(bodyParser.json());
  * @apiGroup Password
  *
  * @apiParam {String} email  a users email
- * @apiParam {String} password a users current password
- * @apiParam {String} password a users new password
  *
  * @apiSuccess (Success 201) {boolean} success true when the reset password url is sent
  * @apiSuccess (Success 201) {String} email the email of the account that need to reset password
  *
  * @apiError (400: Missing Parameters) {String} message "Missing required information"
- *
  * @apiError (400: Email not exists) {String} message "Email not exists"
  */
 router.get('/', (req, res) => {
-  const email = req.body.email;
+
+  const email = req.query.email;
+
   if (email) {
-    const theQuery = "SELECT Verification_Code FROM Members WHERE Email=$1";
+    const theQuery = "SELECT Verification_Code, Verification FROM Members WHERE Email=$1";
     const values = [email];
     pool.query(theQuery, values)
       .then(result => {
+
         if (result.rows.length === 0) {
           res.status(404).send({
             success: false,
-            message: "Email not existed"
+            message: "Email does not exist"
           });
-        }
-        else {
+        } else if (!result.rows[0].verification) {
+          res.status(400).send({
+            success: false,
+            message: "Email is not verified yet"
+          })
+        } else {
+          // set reset password flag to 1
+          let theQuery = "UPDATE MEMBERS SET ResetPassword=1 WHERE Email=$1";
+          pool.query(theQuery, [email]);
+          // send success response
           const verification = result.rows[0].verification_code;
           res.status(201).send({
             success: true,
@@ -78,21 +81,16 @@ router.get('/', (req, res) => {
  * @apiError (404: Verification code not found) {String} message "The reset password URL is invalid"
  */
 router.get('/:verification', (req, res) => {
-  const theQuery = "SELECT Email FROM Members WHERE Verification_Code=$1";
+  const theQuery = "SELECT Email, ResetPassword FROM Members WHERE Verification_Code=$1";
   const values = [req.params.verification];
   pool.query(theQuery, values)
     .then(result => {
-      if (result.rows.length === 0) {
-        res.status(404).send({
-          success: false,
-          message: "The reset password URL is invalid"
-        });
-      }
-      else {
         res.statusCode = 202;
         res.setHeader('Content-Type', 'text/html');
-        res.sendFile('views/reset_password.html', { root: '.' })
-      }
+        const htmlFilePath = result.rows.length !== 0 && result.rows[0].resetpassword === 1
+          ? 'views/reset_password.html'
+          : 'views/reset_password_invalid.html';
+          res.sendFile(htmlFilePath, { root: '.' });
     })
     .catch((err) => {
       res.status(400).send({
