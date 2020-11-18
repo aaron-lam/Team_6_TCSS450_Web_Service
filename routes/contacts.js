@@ -111,17 +111,20 @@ router.post("/", (request, response, next) => {
  * @apiGroup Contacts
  * 
  * @apiHeader {String} authorization Valid JSON Web Token JWT
- * @apiParam {Number} userId the contact's user ID number
+ * @apiParam {Number} userId (Optional) the contact's user ID number.  If no number provided, all are contacts returned
  * 
- * @apiSuccess {String} first contact's first name
- * @apiSuccess {String} last contact's last name
- * @apiSuccess {String} username contact's username
+ * @apiSuccess {Object[]} contacts List of confirmed contacts associated with the requester
+ * @apiSuccess {String} first requested contact's first name
+ * @apiSuccess {String} last requested contact's last name
+ * @apiSuccess {String} username requested contact's username
  * 
- * @apiError (400: Invalid contact) {String} message "User not found"
+ * @apiError (400: Invalid user) {String} message "User not found"
  * 
- * @apiError (400: Unconfirmed contact) {String} message "User is not a contact"
+ * @apiError (400: Not a contact) {String} message "User is not a contact"
  * 
  * @apiError (400: Unconfirmed contact) {String} message "Contact is not confirmed"
+ * 
+ * @apiError (400: Empty contact list) {String} message "No contacts exist"
  * 
  * @apiError (400: Missing Parameters) {String} message "Missing required information"
  * 
@@ -129,16 +132,32 @@ router.post("/", (request, response, next) => {
  * 
  * @apiError (400: SQL Error) {String} message the reported SQL error details
  * 
- * @apiError (400: Contact contact does not exist) {String} message "Contact's username not found"
- * 
  * @apiUse JSONError
  */ 
 router.get("/:contact", (request, response, next) => {
-    // Checking for empty parameter
+    // Empty parameter operation
     if (!request.params.userId) {
-        response.status(400).send({
-            message: "Missing required information"
+        let query = 'SELECT * FROM CONTACTS WHERE MemberID_A=$1 AND Verified=$2'
+        let values = [request.decoded.memberid, 1]
+
+        pool.query(query, values)
+        .then(result=> {
+            if (result.rowCount == 0) {
+                response.status(400).send({
+                    message: "No contacts exist",
+                })
+            } else {
+                response.send({
+                    contacts: result.rows
+                })
+            }
+        }).catch(error => {
+            response.status(400).send({
+                message: "SQL Error on userId check",
+                error: error
+            })
         })
+
     // Checking for bad parameter
     } else if (isNaN(request.params.userId)) {
         response.status(400).send({
