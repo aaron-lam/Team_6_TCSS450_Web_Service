@@ -21,7 +21,7 @@ router.use(bodyParser.json());
  *
  * @apiParam {String} email  a user's email
  * @apiParam {String} password a user's current password
- * @apiParam {String} password a user's new password
+ * @apiParam {String} newPassword a user's new password
  *
  * @apiSuccess (Success 201) {boolean} success true when password is changed
  * @apiSuccess (Success 201) {String} message success message
