@@ -1630,6 +1630,13 @@ define({ "api": [
             "optional": false,
             "field": "password",
             "description": "<p>a user's current password</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "newPassword",
+            "description": "<p>a user's new password</p>"
           }
         ]
       }
