@@ -8,7 +8,7 @@ const { sendEmail } = require("../../../utilities/utils");
 
 /**
  * @api {get} /password/reset Request to reset a password
- * @apiName getPasswordReset
+ * @apiName GetPasswordReset
  * @apiGroup Password
  *
  * @apiParam {String} email  a users email
@@ -20,15 +20,12 @@ const { sendEmail } = require("../../../utilities/utils");
  * @apiError (400: Email not exists) {String} message "Email not exists"
  */
 router.get('/', (req, res) => {
-
   const email = req.query.email;
-
   if (email) {
     const theQuery = "SELECT Verification_Code, Verification FROM Members WHERE Email=$1";
     const values = [email];
     pool.query(theQuery, values)
       .then(result => {
-
         if (result.rows.length === 0) {
           res.status(404).send({
             success: false,
@@ -73,7 +70,7 @@ router.get('/', (req, res) => {
 
 /**
  * @api {get} /password/reset/:verification Request to render "reset password" web page
- * @apiName getPasswordResetVerification
+ * @apiName GetPasswordResetVerification
  * @apiGroup Password
  *
  * @apiSuccess (Success 202) {boolean} success true when the verification code is valid

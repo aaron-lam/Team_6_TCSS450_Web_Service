@@ -1508,82 +1508,10 @@
     "groupTitle": "Messages"
   },
   {
-    "type": "post",
-    "url": "/password",
-    "title": "Request to change a password",
-    "name": "PostAuth",
-    "group": "Password",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "email",
-            "description": "<p>a users email</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "password",
-            "description": "<p>a users current password</p>"
-          }
-        ]
-      }
-    },
-    "success": {
-      "fields": {
-        "Success 201": [
-          {
-            "group": "Success 201",
-            "type": "boolean",
-            "optional": false,
-            "field": "success",
-            "description": "<p>true when password is changed</p>"
-          },
-          {
-            "group": "Success 201",
-            "type": "String",
-            "optional": false,
-            "field": "message",
-            "description": "<p>success message</p>"
-          }
-        ]
-      }
-    },
-    "error": {
-      "fields": {
-        "400: Missing Parameters": [
-          {
-            "group": "400: Missing Parameters",
-            "type": "String",
-            "optional": false,
-            "field": "message",
-            "description": "<p>&quot;Missing required information&quot;</p>"
-          }
-        ],
-        "400: Credentials not match": [
-          {
-            "group": "400: Credentials not match",
-            "type": "String",
-            "optional": false,
-            "field": "message",
-            "description": "<p>&quot;Credentials not match&quot;</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "routes/auth/password/change_password.js",
-    "groupTitle": "Password"
-  },
-  {
     "type": "get",
     "url": "/password/reset",
     "title": "Request to reset a password",
-    "name": "getPasswordReset",
+    "name": "GetPasswordReset",
     "group": "Password",
     "parameter": {
       "fields": {
@@ -1648,7 +1576,7 @@
     "type": "get",
     "url": "/password/reset/:verification",
     "title": "Request to render \"reset password\" web page",
-    "name": "getPasswordResetVerification",
+    "name": "GetPasswordResetVerification",
     "group": "Password",
     "success": {
       "fields": {
@@ -1678,6 +1606,78 @@
     },
     "version": "0.0.0",
     "filename": "routes/auth/password/reset_password.js",
+    "groupTitle": "Password"
+  },
+  {
+    "type": "put",
+    "url": "/password",
+    "title": "Request to change a password",
+    "name": "PutPasswordReset",
+    "group": "Password",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "email",
+            "description": "<p>a user's email</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "password",
+            "description": "<p>a user's current password</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 201": [
+          {
+            "group": "Success 201",
+            "type": "boolean",
+            "optional": false,
+            "field": "success",
+            "description": "<p>true when password is changed</p>"
+          },
+          {
+            "group": "Success 201",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>success message</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "400: Missing Parameters": [
+          {
+            "group": "400: Missing Parameters",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;Missing required information&quot;</p>"
+          }
+        ],
+        "400: Credentials not match": [
+          {
+            "group": "400: Credentials not match",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;Credentials not match&quot;</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/auth/password/change_password.js",
     "groupTitle": "Password"
   },
   {
@@ -1715,5 +1715,88 @@
     "version": "0.0.0",
     "filename": "routes/auth/verify.js",
     "groupTitle": "Verification"
+  },
+  {
+    "type": "Get",
+    "url": "/weather/location",
+    "title": "Request weather data based on a lat/long",
+    "name": "GetWeather",
+    "group": "Weather",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "Number",
+            "optional": false,
+            "field": "Latitude",
+            "description": ""
+          },
+          {
+            "group": "Header",
+            "type": "Number",
+            "optional": false,
+            "field": "Longitude",
+            "description": ""
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "JSON",
+            "optional": false,
+            "field": "weather",
+            "description": "<p>object containing data for the week</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "400: Missing Parameters": [
+          {
+            "group": "400: Missing Parameters",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;Missing required information&quot;</p>"
+          }
+        ],
+        "400: Weather API Error": [
+          {
+            "group": "400: Weather API Error",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;Axios Error Message&quot;</p>"
+          }
+        ],
+        "400: Malformed lat/long": [
+          {
+            "group": "400: Malformed lat/long",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;Location not found&quot;</p>"
+          }
+        ],
+        "400: JSON Error": [
+          {
+            "group": "400: JSON Error",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;malformed JSON in parameters&quot;</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/weather.js",
+    "groupTitle": "Weather"
   }
 ]
