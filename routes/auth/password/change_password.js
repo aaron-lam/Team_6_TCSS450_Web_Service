@@ -15,13 +15,13 @@ const bodyParser = require("body-parser");
 router.use(bodyParser.json());
 
 /**
- * @api {post} /password Request to change a password
- * @apiName PostAuth
+ * @api {put} /password Request to change a password
+ * @apiName PutPasswordReset
  * @apiGroup Password
  *
- * @apiParam {String} email  a users email
- * @apiParam {String} password a users current password
- * @apiParam {String} password a users new password
+ * @apiParam {String} email  a user's email
+ * @apiParam {String} password a user's current password
+ * @apiParam {String} password a user's new password
  *
  * @apiSuccess (Success 201) {boolean} success true when password is changed
  * @apiSuccess (Success 201) {String} message success message
