@@ -10,6 +10,29 @@ const axios = require('axios')
 let parseWeather = require('../utilities/utils').parseWeather
 
 
+/**
+ * @apiDefine JSONError
+ * @apiError (400: JSON Error) {String} message "malformed JSON in parameters"
+ */ 
+
+/**
+ * @api {Get} /weather/location Request weather data based on a lat/long
+ * @apiName GetWeather
+ * @apiGroup Weather
+ * 
+ * @apiHeader {Number} Latitude
+ * @apiHeader {Number} Longitude
+ * 
+ * @apiSuccess (Success 200) {JSON} weather object containing data for the week
+ * 
+ * @apiError (400: Missing Parameters) {String} message "Missing required information"
+ * 
+ * @apiError (400: Weather API Error) {String} message "Axios Error Message"
+ *
+ * @apiError (400: Malformed lat/long) {String} message "Location not found"
+ * 
+ * @apiUse JSONError
+ */ 
 router.get('/location', (req, res) => {
 
     let lat = req.headers.lat
@@ -46,15 +69,5 @@ router.get('/location', (req, res) => {
         })
     }
 });
-
-router.get('/city', (req, res) => {
-    if(req.headers.city) {
-
-    } else {
-        res.status(400).send({
-            message: "Missing required information"
-        })
-    }
-})
 
 module.exports = router
