@@ -36,6 +36,7 @@ let config = {
  * @apiError (400: SQL Error) {String} message the reported SQL error details
  */
 router.get('/', (request, response) => {
+
   if (!request.headers.authorization || request.headers.authorization.indexOf('Basic ') === -1) {
     return response.status(401).json({ message: 'Missing Authorization Header' })
   }

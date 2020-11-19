@@ -71,6 +71,8 @@ router.put('/', (req, res) => {
               if (validatePasswordErrorMessage) {
                 throw new Error("New " + validatePasswordErrorMessage);
               }
+              // set reset password flag to 0
+              pool.query(`UPDATE MEMBERS SET ResetPassword=0 WHERE ${email ? "email" : "verification_code"}=$1`, [(email ? email : verificationCode)]);
               const saltedHash = getHash(newPassword, salt);
               const theQuery = `UPDATE MEMBERS SET Password=$2 WHERE ${email ? "email" : "verification_code"}=$1 RETURNING Email`;
               const values = [(email ? email : verificationCode), saltedHash];
