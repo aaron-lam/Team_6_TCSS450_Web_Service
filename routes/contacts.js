@@ -30,7 +30,7 @@ router.use(bodyParser.json())
  * 
  * @apiError (400: userId Error) {String} message "Malformed parameter. userId must be a number"
  * 
- * @apiError (400: Contact userId does not exist) {String} message "Added User's ID not found"
+ * @apiError (404: Contact userId does not exist) {String} message "Added User's ID not found"
  * 
  * @apiUse JSONError
  */ 
@@ -55,7 +55,7 @@ router.post("/", (request, response, next) => {
     pool.query(query, values)
         .then(result=> {
             if (result.rowCount == 0) {
-                response.status(400).send({
+                response.status(404).send({
                     message: "Added User's ID not found"
                 })
             } else {
@@ -224,7 +224,7 @@ router.get("/:userId?", (request, response, next) => {
  * 
  * @apiSuccess (Success 200) {boolean} success true when the contact is deleted
  * 
- * @apiError (400: Invalid contact) {String} message "User not found"
+ * @apiError (404: Invalid contact) {String} message "User not found"
  * 
  * @apiError (400: Unconfirmed contact) {String} message "User is not a contact"
  * 
@@ -255,7 +255,7 @@ router.delete("/:userId?", (request, response, next) => {
         pool.query(query, values)
             .then(result=> {
                 if (result.rowCount == 0) {
-                    response.status(400).send({
+                    response.status(404).send({
                         message: "User not found"
                     })
                 } else {
@@ -293,6 +293,104 @@ router.delete("/:userId?", (request, response, next) => {
                   WHERE MemberID_A=$1
                   AND MemberID_B=$2
                   RETURNING *`
+    let values = [request.decoded.memberid, request.params.userId]
+    pool.query(insert, values)
+        .then(result=> {
+            response.send({
+                success: true
+            })
+        }).catch(err => {
+            response.status(400).send({
+                message: "SQL Error",
+                error: err
+            })
+        })
+})
+
+/**
+ * @api {put} /contacts/:userId? Request to update a contact
+ * @apiName PutContacts
+ * @apiGroup Contacts
+ * 
+ * @apiHeader {String} authorization Valid JSON Web Token JWT
+ * @apiParam {Number} userId the contact's user ID number
+ * 
+ * @apiSuccess (Success 200) {boolean} success true when the contact is updated
+ * 
+ * @apiError (404: Invalid contact) {String} message "User not found"
+ * 
+ * @apiError (400: No contact relationship) {String} message "User is not a contact"
+ * 
+ * @apiError (400: Missing Parameters) {String} message "Missing required information"
+ * 
+ * @apiError (400: userId Error) {String} message "Malformed parameter. userId must be a number"
+ * 
+ * @apiError (400: Contact confirmed error) {String} message "Contact is already verified"
+ * 
+ * @apiError (400: SQL Error) {String} message the reported SQL error details
+ * 
+ * @apiUse JSONError
+ */
+router.put("/:userId?", (request, response, next) => {
+    // Check for no parameter
+    if (!request.params.userId) {
+        response.status(400).send({
+            message: "Missing required information"
+        })
+    // Check for bad parameter
+    } else if (isNaN(request.params.userId)) {
+        response.status(400).send({
+            message: "Malformed parameter. userId must be a number"
+        })
+    } else {
+        //validate userId exists
+        let query = 'SELECT * FROM MEMBERS WHERE MemberID=$1'
+        let values = [request.params.userId]
+
+        pool.query(query, values)
+            .then(result=> {
+                if (result.rowCount == 0) {
+                    response.status(404).send({
+                        message: "User not found"
+                    })
+                } else {
+                    next()
+                }
+            }).catch(error => {
+                response.status(400).send({
+                    message: "SQL Error on userId check",
+                    error: error
+                })
+            })
+    }
+}, (request, response, next) => {
+    // Check if contact exists
+    let query = 'SELECT * FROM CONTACTS WHERE MemberID_A=$1 AND MemberID_B=$2'
+    let values = [request.decoded.memberid, request.params.userId]
+
+    pool.query(query, values)
+        .then(result => {
+            if (result.rowCount == 0) {
+                response.status(400).send({
+                    message: "User is not a contact",
+                })
+            } else if (result.rows[0].verified == 1) {
+                response.status(400).send({
+                    message: "Contact is already verified",
+                })
+            } else {
+                next()
+            }
+        }).catch(error => {
+            response.status(400).send({
+                message: "SQL Error",
+                error: error
+            })
+        })
+}, (request, response) => {
+    let insert = `UPDATE Contacts
+                    SET verified=1
+                    WHERE MemberID_A=$1 AND MemberID_B=$2`
     let values = [request.decoded.memberid, request.params.userId]
     pool.query(insert, values)
         .then(result=> {

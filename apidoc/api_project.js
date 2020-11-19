@@ -13,7 +13,11 @@ define({
   "apidoc": "0.3.0",
   "generator": {
     "name": "apidoc",
+<<<<<<< Updated upstream
     "time": "2020-11-18T05:09:08.132Z",
+=======
+    "time": "2020-11-19T03:30:38.847Z",
+>>>>>>> Stashed changes
     "url": "https://apidocjs.com",
     "version": "0.25.0"
   }
