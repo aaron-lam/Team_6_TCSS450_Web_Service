@@ -50,7 +50,9 @@ function parseWeather(weatherData) {
     return {
         day: days[time.getDay()] + time.getDate(),
         weather: weatherData.weather[0].main, 
-        temp: weatherData.temp.day
+        temp: weatherData.temp.day,
+        humidity: weatherData.humidity,
+        wind_speed:weatherData.wind_speed
     }    
 }
 
