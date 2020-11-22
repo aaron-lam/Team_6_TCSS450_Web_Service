@@ -40,6 +40,10 @@ function getHash(pw, salt) {
     return crypto.createHash("sha256").update(pw + salt).digest("hex")
 }
 
+/**
+ * 
+ * @param {List[JSON]} weatherData Data set from OpenWeather API for daily weather
+ */
 function parseWeather(weatherData) {
     let days = { 0:'Sun ', 1:'Mon ', 2:'Tue ', 3:'Wed ', 4:'Th ', 5:'Fri ', 6:'Sat '}
     let time = new Date(weatherData.dt * 1000)
@@ -50,9 +54,27 @@ function parseWeather(weatherData) {
     }    
 }
 
+/**
+ * Extracts Data from API to data desired for application
+ * @param {List[JSON]} weatherData  Data set from OpenWeather API for hourly weather
+ * @returns {List[JSON]} returns weather type, temperature, windspeed, humidity for each hour
+ */
+function parseForecast(hourlyData) {
+    let data = []
+    hourlyData.forEach(hour => {
+        data.push({
+            weather: hour.weather[0].main,
+            temp: hour.temp,
+            humidity: hour.humidity,
+            wind_speed: hour.wind_speed
+        }) 
+    })
+    return data
+}
+
 
 module.exports = {
 
-    pool, getHash, sendEmail, messaging, parseWeather
+    pool, getHash, sendEmail, messaging, parseWeather, parseForecast
 
 }

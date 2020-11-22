@@ -8,6 +8,7 @@ const axios = require('axios')
 
 
 let parseWeather = require('../utilities/utils').parseWeather
+let parseForecast = require('../utilities/utils').parseForecast
 
 
 /**
@@ -40,21 +41,18 @@ router.get('/location', (req, res) => {
 
     if (lat && long) {
         temperatures = []
-        excludeParams = "minutely,hourly,alerts"
+        excludeParams = "minutely,alerts"
         axios.get(
             `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${long}&exclude=${excludeParams}&units=imperial&appid=${process.env.WEATHER_KEY}`)
         .then(weatherRes => {
             weatherData = weatherRes.data
-            temperatures.push({
-                day: 'Today',
-                weather: weatherData.current.weather[0].main, 
-                temp: weatherData.current.temp
-            });
-            for(let i = 1; i < 7; i++) {
+            forecast = parseForecast(weatherData.hourly);
+            for(let i = 0; i < 7; i++) {
                 temperatures.push(parseWeather(weatherData.daily[i]));
             }
             res.json({
-                data: temperatures
+                forecast: forecast,
+                daily: temperatures
             })
         })
         .catch(error => {
