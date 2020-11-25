@@ -1,6 +1,6 @@
 //initial setup
 const express = require('express')
-let pool = require('../utilities/utils').pool
+let pool = require('../../utilities/utils').pool
 
 var router = express.Router()
 const bodyParser = require("body-parser")
