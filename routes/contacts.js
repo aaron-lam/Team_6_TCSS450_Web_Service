@@ -10,30 +10,30 @@ router.use(bodyParser.json())
 /**
  * @apiDefine JSONError
  * @apiError (400: JSON Error) {String} message "malformed JSON in parameters"
- */ 
+ */
 
 /**
  * @api {post} /contacts Request to add a contact to the user's contact list
  * @apiName PostContacts
  * @apiGroup Contacts
- * 
+ *
  * @apiHeader {String} authorization Valid JSON Web Token JWT
  * @apiParam {Number} userId the userId of the contact to be added
- * 
+ *
  * @apiSuccess (Success 200) {boolean} success true when the contact is added
- * 
+ *
  * @apiError (400: Duplicate contact) {String} message "Contact already exists"
- * 
+ *
  * @apiError (400: Missing Parameters) {String} message "Missing required information"
- * 
+ *
  * @apiError (400: SQL Error) {String} message the reported SQL error details
- * 
+ *
  * @apiError (400: userId Error) {String} message "Malformed parameter. userId must be a number"
- * 
+ *
  * @apiError (400: Contact userId does not exist) {String} message "Added User's ID not found"
- * 
+ *
  * @apiUse JSONError
- */ 
+ */
 router.post("/", (request, response, next) => {
     // Check for empty parameters
     if (!request.body.userId) {
@@ -109,33 +109,33 @@ router.post("/", (request, response, next) => {
  * @api {get} /contacts/:userId? Request to view a contact
  * @apiName GetContacts
  * @apiGroup Contacts
- * 
+ *
  * @apiHeader {String} authorization Valid JSON Web Token JWT
  * @apiParam {Number} userId (Optional) the contact's user ID number.  If no number provided, all are contacts returned
- * 
+ *
  * @apiSuccess {Object[]} contacts List of confirmed contacts associated with the requester
  * @apiSuccess {String} first requested contact's first name
  * @apiSuccess {String} last requested contact's last name
  * @apiSuccess {String} username requested contact's username
- * 
+ *
  * @apiError (400: Invalid user) {String} message "User not found"
- * 
+ *
  * @apiError (400: Not a contact) {String} message "User is not a contact"
- * 
+ *
  * @apiError (400: Unconfirmed contact) {String} message "Contact is not confirmed"
- * 
+ *
  * @apiError (400: Empty contact list) {String} message "No contacts exist"
- * 
+ *
  * @apiError (400: userId Error) {String} message "Malformed parameter. userId must be a number"
- * 
+ *
  * @apiError (400: SQL Error) {String} message the reported SQL error details
- * 
+ *
  * @apiUse JSONError
- */ 
+ */
 router.get("/:userId?", (request, response, next) => {
     // Empty parameter operation
     if (!request.params.userId) {
-        let query = 'SELECT FirstName, LastName, Username FROM Members WHERE MemberID IN (SELECT MemberID_B FROM Contacts WHERE MemberID_A=$1 AND Verified=1);'
+        let query = 'SELECT FirstName, LastName, Username, MemberId FROM Members WHERE MemberID IN (SELECT MemberID_B FROM Contacts WHERE MemberID_A=$1 AND Verified=1);'
         let values = [request.decoded.memberid]
 
         pool.query(query, values)
@@ -203,7 +203,8 @@ router.get("/:userId?", (request, response, next) => {
             response.send({
                 first: result.rows[0].firstname,
                 last: result.rows[0].lastname,
-                username: result.rows[0].username
+                username: result.rows[0].username,
+                memberId: result.rows[0].memberid
             })
         }
     }).catch(error => {
@@ -218,22 +219,22 @@ router.get("/:userId?", (request, response, next) => {
  * @api {delete} /contacts/:userId? Request to delete a contact
  * @apiName DeleteContacts
  * @apiGroup Contacts
- * 
+ *
  * @apiHeader {String} authorization Valid JSON Web Token JWT
  * @apiParam {Number} userId the contact's user ID number
- * 
+ *
  * @apiSuccess (Success 200) {boolean} success true when the contact is deleted
- * 
+ *
  * @apiError (400: Invalid contact) {String} message "User not found"
- * 
+ *
  * @apiError (400: Unconfirmed contact) {String} message "User is not a contact"
- * 
+ *
  * @apiError (400: Missing Parameters) {String} message "Missing required information"
- * 
+ *
  * @apiError (400: userId Error) {String} message "Malformed parameter. userId must be a number"
- * 
+ *
  * @apiError (400: SQL Error) {String} message the reported SQL error details
- * 
+ *
  * @apiUse JSONError
  */
 router.delete("/:userId?", (request, response, next) => {

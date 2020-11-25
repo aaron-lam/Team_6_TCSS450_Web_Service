@@ -51,17 +51,26 @@ router.post("/", (request, response, next) => {
   let values = [request.body.name];
   pool.query(insert, values)
     .then(result => {
+      const chatRoomId = result.rows[0].chatid;
+      if (request.body.memberIds) {
+        for (const id of request.body.memberIds) {
+          let insert = `INSERT INTO ChatMembers(ChatId, MemberId)
+                  VALUES ($1, $2)
+                  RETURNING *`;
+          let values = [chatRoomId, id];
+          pool.query(insert, values);
+        }
+      }
       response.send({
         sucess: true,
-        chatID: result.rows[0].chatid
-      })
+        chatID: chatRoomId
+      });
     }).catch(err => {
     response.status(400).send({
       message: "SQL Error",
       error: err
     })
-
-  })
+  });
 });
 
 /**
