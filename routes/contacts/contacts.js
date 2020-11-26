@@ -135,7 +135,7 @@ router.post("/", (request, response, next) => {
 router.get("/:userId?", (request, response, next) => {
     // Empty parameter operation
     if (!request.params.userId) {
-        let query = 'SELECT FirstName, LastName, Username FROM Members WHERE MemberID IN (SELECT MemberID_B FROM Contacts WHERE MemberID_A=$1 AND Verified=1);'
+        let query = 'SELECT MemberID, FirstName, LastName, Username FROM Members WHERE MemberID IN (SELECT MemberID_B FROM Contacts WHERE MemberID_A=$1 AND Verified=1);'
         let values = [request.decoded.memberid]
 
         pool.query(query, values)
@@ -201,6 +201,7 @@ router.get("/:userId?", (request, response, next) => {
             })
         } else {
             response.send({
+                memberid: result.rows[0].memberid,
                 first: result.rows[0].firstname,
                 last: result.rows[0].lastname,
                 username: result.rows[0].username
