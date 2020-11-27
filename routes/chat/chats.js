@@ -21,6 +21,7 @@ router.use(require("body-parser").json());
  *
  * @apiHeader {String} authorization Valid JSON Web Token JWT
  * @apiParam {String} name the name for the chat
+ * @apiParam {Object[]} memberIds lists of member ids
  *
  * @apiSuccess (Success 201) {boolean} success true when the name is inserted
  * @apiSuccess (Success 201) {Number} chatId the generated chatId
@@ -44,7 +45,6 @@ router.post("/", (request, response, next) => {
     next()
   }
 }, (request, response) => {
-
   let insert = `INSERT INTO Chats(Name)
                   VALUES ($1)
                   RETURNING ChatId`;
@@ -52,13 +52,10 @@ router.post("/", (request, response, next) => {
   pool.query(insert, values)
     .then(result => {
       const chatRoomId = result.rows[0].chatid;
+      addUserToChatRoom(chatRoomId, request.decoded.memberid);
       if (request.body.memberIds) {
         for (const id of request.body.memberIds) {
-          let insert = `INSERT INTO ChatMembers(ChatId, MemberId)
-                  VALUES ($1, $2)
-                  RETURNING *`;
-          let values = [chatRoomId, id];
-          pool.query(insert, values);
+          addUserToChatRoom(chatRoomId, id);
         }
       }
       response.send({
@@ -72,6 +69,19 @@ router.post("/", (request, response, next) => {
     })
   });
 });
+
+/**
+ * Add user to the chat room.
+ * @param chatRoomId chat room ID
+ * @param userId user ID
+ */
+function addUserToChatRoom(chatRoomId, userId) {
+  const insert = `INSERT INTO ChatMembers(ChatId, MemberId)
+                  VALUES ($1, $2)
+                  RETURNING *`;
+  const values = [chatRoomId, userId];
+  pool.query(insert, values);
+}
 
 /**
  * @api {put} /chats/:chatId? Request add a user to a chat
