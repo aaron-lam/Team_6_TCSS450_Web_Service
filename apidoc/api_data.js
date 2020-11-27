@@ -728,6 +728,13 @@ define({ "api": [
             "optional": false,
             "field": "name",
             "description": "<p>the name for the chat</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Object[]",
+            "optional": false,
+            "field": "memberIds",
+            "description": "<p>lists of member ids</p>"
           }
         ]
       }
