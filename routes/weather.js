@@ -5,7 +5,7 @@ const router = express.Router()
 router.use(express.json())
 
 const axios = require('axios')
-
+const zipcodes = require('zipcodes')
 
 let parseWeather = require('../utilities/utils').parseWeather
 let parseForecast = require('../utilities/utils').parseForecast
@@ -38,6 +38,13 @@ router.get('/location', (req, res) => {
 
     let lat = req.headers.lat
     let long = req.headers.long
+    let zipcode = req.headers.zipcode
+
+    if(zipcode) {
+        const zipcodeInfo = zipcodes.lookup(zipcode);
+        lat = zipcodeInfo.latitude
+        long = zipcodeInfo.longitude
+    }   
 
     if (lat && long) {
         temperatures = []
@@ -67,5 +74,8 @@ router.get('/location', (req, res) => {
         })
     }
 });
+
+
+
 
 module.exports = router
