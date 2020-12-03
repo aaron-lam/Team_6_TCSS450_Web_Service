@@ -105,6 +105,60 @@ router.post("/", (request, response, next) => {
         })
 })
 
+
+/** THIS IS FOR GETTING CONTACT REQUESTS
+ * 
+ * Returns people who have requested to be contacts that are unconfirmed
+ * 
+ */
+router.get("/requests", (request, response, next) => {
+    
+    // Get the user ID's of the members who have requested to be contacts and are not confirmed
+    let query = 'SELECT MemberID_A FROM CONTACTS WHERE MemberID_B=$1 and verified=0'
+    let values = [request.decoded.memberid]
+
+    pool.query(query,values)
+    .then(result => {
+        
+        if (result.rows.length == 0) {
+            response.status(400).send({
+                message: "No contact requests",
+            })
+        }
+
+        // build the query with all memberId's
+        // Also build the values array
+        let query = 'SELECT username, memberid FROM MEMBERS WHERE '
+        let values = [];
+        for (i = 0; i < result.rows.length; i++) {
+
+            values[i] = result.rows[i].memberid_a
+            query += 'MEMBERID=$' + (i+1)
+
+            // if it's not the last one, add syntax for another memberid
+            if (i+1 < result.rows.length) {
+                query += ' or '
+            }
+        }
+
+        // Final query
+        pool.query(query,values)
+        .then(newResult => {
+            response.send({contactRequests: newResult.rows})
+        }).catch(error => {
+            response.status(400).send({
+                message: "SQL Error on member table request",
+                error: error
+            })
+        })
+    }).catch(error => {
+        response.status(400).send({
+            message: "SQL Error on contacts table request",
+            error: error
+        })
+    })
+})
+
 /**
  * @api {get} /contacts/:userId? Request to view a contact
  * @apiName GetContacts
