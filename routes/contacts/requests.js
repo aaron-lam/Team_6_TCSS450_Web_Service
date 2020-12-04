@@ -26,7 +26,7 @@ router.post('/:memberId?', (request, response, next) => {
           message: "POST Malformed parameter. memberId must be a number"
       })
   } else {
-      let confirmedMemberId = request.params.memberid
+      let confirmedMemberId = request.params.memberId
       let hostMemberId = request.decoded.memberid
 
       let query = 'UPDATE CONTACTS SET VERIFIED=1 WHERE MEMBERID_A=$1 AND MEMBERID_B=$2'
@@ -63,7 +63,7 @@ router.delete('/:memberId?', (request, response, next) => {
           message: "DELETE Malformed parameter. memberId must be a number"
       })
   } else {
-      let deniedMemberId = request.params.memberid
+      let deniedMemberId = request.params.memberId
       let hostMemberId = request.decoded.memberid
 
       let query = 'DELETE FROM CONTACTS WHERE MEMBERID_A=$1 AND MEMBERID_B=$2 AND VERIFIED=0'
