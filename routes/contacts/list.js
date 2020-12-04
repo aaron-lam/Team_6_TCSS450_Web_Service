@@ -69,7 +69,7 @@ router.post('/', (request, response, next) => {
         })
 }, (request, response, next) => {
     // check for duplicate contact
-    let query = 'SELECT * FROM CONTACTS WHERE (MemberID_A=$1 AND MemberID_B=$2) OR (MemberID_A=$2 AND MemberID_B=$1)'
+    let query = 'SELECT * FROM CONTACTS WHERE (MemberID_A=$1 AND MemberID_B=$2)'
     let values = [request.decoded.memberid, request.body.memberId]
 
     pool.query(query, values)
