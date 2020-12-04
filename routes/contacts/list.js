@@ -69,7 +69,7 @@ router.post('/', (request, response, next) => {
         })
 }, (request, response, next) => {
     // check for duplicate contact
-    let query = 'SELECT * FROM CONTACTS WHERE (MemberID_A=$1 AND MemberID_B=$2)'
+    let query = 'SELECT * FROM CONTACTS WHERE (MemberID_A=$1 AND MemberID_B=$2) OR (MemberID_A=$2 AND MemberID_B=$1)'
     let values = [request.decoded.memberid, request.body.memberId]
 
     pool.query(query, values)
@@ -167,7 +167,7 @@ router.get('/:memberId?', (request, response, next) => {
     }
 }, (request, response, next) => {
     // Check if contact exists, and confirmation status
-    let query = 'SELECT * FROM CONTACTS WHERE MemberID_A=$1 AND MemberID_B=$2'
+    let query = 'SELECT * FROM CONTACTS WHERE (MemberID_A=$1 AND MemberID_B=$2) OR (MemberID_A=$2 AND MemberID_B=$1)'
     let values = [request.decoded.memberid, request.params.memberId]
 
     pool.query(query, values)
@@ -272,7 +272,7 @@ router.delete('/:memberId?', (request, response, next) => {
     }
 }, (request, response, next) => {
     // Check if contact exists
-    let query = 'SELECT * FROM CONTACTS WHERE MemberID_A=$1 AND MemberID_B=$2'
+    let query = 'SELECT * FROM CONTACTS WHERE (MemberID_A=$1 AND MemberID_B=$2) OR (MemberID_A=$2 AND MemberID_B=$1)'
     let values = [request.decoded.memberid, request.params.memberId]
 
     pool.query(query, values)
