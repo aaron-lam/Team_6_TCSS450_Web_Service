@@ -136,7 +136,14 @@ router.post('/', (request, response, next) => {
 router.get('/:memberId?', (request, response, next) => {
     // Empty parameter operation
     if (!request.params.memberId) {
-        let query = 'SELECT FirstName, LastName, Username, MemberId FROM Members WHERE MemberID IN (SELECT MemberID_B FROM Contacts WHERE (MemberID_A=$1 AND Verified=1) OR (MemberID_B=$1 AND Verified=1));'
+        let query = 
+        `SELECT FirstName, LastName, Username, MemberId 
+        FROM Members 
+        WHERE MemberID 
+        IN 
+        ((SELECT MemberID_B FROM Contacts WHERE (MemberID_A=98 AND Verified=1)) 
+        UNION ALL
+        (SELECT MemberID_A FROM Contacts WHERE (MemberID_B=98 AND Verified=1)))`
         let values = [request.decoded.memberid]
 
         pool.query(query, values)
@@ -167,7 +174,7 @@ router.get('/:memberId?', (request, response, next) => {
     }
 }, (request, response, next) => {
     // Check if contact exists, and confirmation status
-    let query = 'SELECT * FROM CONTACTS WHERE (MemberID_A=$1 AND MemberID_B=$2) OR (MemberID_A=$2 AND MemberID_B=$1)'
+    let query = 'SELECT * FROM CONTACTS WHERE (MemberID_A=$1 AND MemberID_B=$2 AND VERIFIED=1) OR (MemberID_A=$2 AND MemberID_B=$1 AND VERIFIED=1)'
     let values = [request.decoded.memberid, request.params.memberId]
 
     pool.query(query, values)
@@ -175,10 +182,6 @@ router.get('/:memberId?', (request, response, next) => {
             if (result.rowCount == 0) {
                 response.status(400).send({
                     message: "User is not a contact",
-                })
-            } else if (result.rows[0].verified == 0) {
-                response.status(400).send({
-                    message: "Contact is not confirmed",
                 })
             } else {
                 next()
