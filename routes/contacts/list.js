@@ -141,9 +141,9 @@ router.get('/:memberId?', (request, response, next) => {
         FROM Members 
         WHERE MemberID 
         IN 
-        ((SELECT MemberID_B FROM Contacts WHERE (MemberID_A=98 AND Verified=1)) 
+        ((SELECT MemberID_B FROM Contacts WHERE (MemberID_A=$1 AND Verified=1)) 
         UNION ALL
-        (SELECT MemberID_A FROM Contacts WHERE (MemberID_B=98 AND Verified=1)))`
+        (SELECT MemberID_A FROM Contacts WHERE (MemberID_B=$1 AND Verified=1)))`
         let values = [request.decoded.memberid]
 
         pool.query(query, values)
