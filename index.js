@@ -44,12 +44,17 @@ app.use("/password", require("./routes/auth/password/change_password"));
 app.use("/password/reset", require("./routes/auth/password/reset_password"));
 
 /**
- * Route for users to create, read, update, and delete contacts.
+ * Route for users to create, read, update, and delete contacts
  */
-app.use("/contacts", middleware.checkToken, require("./routes/contacts"));
+app.use("/contacts", middleware.checkToken, require("./routes/contacts/list"));
 
 /**
- * Route for users to get weather information.
+ * Route for users to confirm or deny contact requests
+ */
+app.use("/requests", middleware.checkToken, require("./routes/contacts/requests"));
+
+/**
+ * Route for users to get weather information
  */
 app.use("/weather", require("./routes/weather"));
 
