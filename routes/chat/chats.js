@@ -108,7 +108,7 @@ function addUserToChatRoom(chatRoomId, userId) {
  */
 router.put("/:chatId/", (request, response, next) => {
     //validate on empty parameters
-    if (!request.params.chatId) {
+    if (!request.params.chatId || !request.body.memberIds) {
       response.status(400).send({
         message: "Missing required information"
       })
@@ -116,7 +116,7 @@ router.put("/:chatId/", (request, response, next) => {
       response.status(400).send({
         message: "Malformed parameter. chatId must be a number"
       })
-    } else {
+    } {
       next()
     }
   }, (request, response, next) => {
@@ -161,44 +161,37 @@ router.put("/:chatId/", (request, response, next) => {
         error: error
       })
     })
-  }, (request, response, next) => {
+}, (request, response, next) => {
     //validate email does not already exist in the chat
-    let query = 'SELECT * FROM ChatMembers WHERE ChatId=$1 AND MemberId=$2';
-    let values = [request.params.chatId, request.decoded.memberid];
+    for (const id of request.body.memberIds) {
+      let query = 'SELECT * FROM ChatMembers WHERE ChatId=$1 AND MemberId=$2';
+      let values = [request.params.chatId, id];
 
-    pool.query(query, values)
-      .then(result => {
-        if (result.rowCount > 0) {
-          response.status(400).send({
-            message: "user already joined"
-          })
-        } else {
-          next()
-        }
-      }).catch(error => {
-      response.status(400).send({
-        message: "SQL Error",
-        error: error
-      })
-    })
-
-  }, (request, response) => {
-    //Insert the memberId into the chat
-    let insert = `INSERT INTO ChatMembers(ChatId, MemberId)
-                  VALUES ($1, $2)
-                  RETURNING *`;
-    let values = [request.params.chatId, request.decoded.memberid];
-    pool.query(insert, values)
-      .then(result => {
-        response.send({
-          sucess: true
+      pool.query(query, values)
+        .then(result => {
+          if (result.rowCount > 0) {
+            response.status(400).send({
+              message: "Some users are already joined. Please only select contacts that have not joined the chat yet."
+            })
+          } else {
+            next()
+          }
+        }).catch(error => {
+        response.status(400).send({
+          message: "SQL Error",
+          error: error
         })
-      }).catch(err => {
-      response.status(400).send({
-        message: "SQL Error",
-        error: err
       })
-    })
+    }
+}, (request, response) => {
+    const chatRoomId = request.params.chatId;
+    for (const id of request.body.memberIds) {
+      addUserToChatRoom(chatRoomId, id);
+    }
+    response.send({
+      sucess: true,
+      chatID: chatRoomId
+    });
   }
 );
 
