@@ -171,7 +171,7 @@ router.put("/:chatId/", (request, response, next) => {
         .then(result => {
           if (result.rowCount > 0) {
             response.status(400).send({
-              message: "Some users are already joined. Please only select contacts that have not joined the chat yet."
+              message: "Some of the selected contacts already joined the room. Please only select contacts that have not joined the chat yet."
             })
           } else {
             next()
