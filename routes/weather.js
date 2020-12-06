@@ -7,9 +7,9 @@ router.use(express.json())
 const axios = require('axios')
 const zipcodes = require('zipcodes')
 
-let parseCurrentWeather = require('../utilities/utils').parseCurrentWeather
-let parseWeather = require('../utilities/utils').parseWeather
-let parseForecast = require('../utilities/utils').parseForecast
+let parseCurrentWeather = require('../utilities/weather_utils').parseCurrentWeather
+let parseWeather = require('../utilities/weather_utils').parseWeather
+let parseForecast = require('../utilities/weather_utils').parseForecast
 
 
 /**
