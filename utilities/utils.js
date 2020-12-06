@@ -45,12 +45,21 @@ function getHash(pw, salt) {
  * @param {List[JSON]} weatherData Data set from OpenWeather API for daily weather
  */
 function parseWeather(weatherData) {
-    let days = { 0:'Sun ', 1:'Mon ', 2:'Tue ', 3:'Wed ', 4:'Th ', 5:'Fri ', 6:'Sat '}
-    let time = new Date(weatherData.dt * 1000)
+
     return {
-        day: days[time.getDay()] + time.getDate(),
+        day: getDate(weatherData.dt),
         weather: weatherData.weather[0].main, 
         temp: weatherData.temp.day,
+        humidity: weatherData.humidity,
+        wind_speed:weatherData.wind_speed
+    }    
+}
+
+function parseCurrentWeather(weatherData) {
+    return {
+        day: getDate(weatherData.dt),
+        weather: weatherData.weather[0].main, 
+        temp: weatherData.temp,
         humidity: weatherData.humidity,
         wind_speed:weatherData.wind_speed
     }    
@@ -75,8 +84,16 @@ function parseForecast(hourlyData) {
 }
 
 
+
+function getDate(dt) {
+    let days = { 0:'Sun ', 1:'Mon ', 2:'Tue ', 3:'Wed ', 4:'Th ', 5:'Fri ', 6:'Sat '}
+    let time = new Date(dt * 1000)
+    return days[time.getDay()] + time.getDate();
+}
+
 module.exports = {
 
-    pool, getHash, sendEmail, messaging, parseWeather, parseForecast
+    pool, getHash, sendEmail, messaging, 
+    parseCurrentWeather, parseWeather, parseForecast
 
 }

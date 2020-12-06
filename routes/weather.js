@@ -7,6 +7,7 @@ router.use(express.json())
 const axios = require('axios')
 const zipcodes = require('zipcodes')
 
+let parseCurrentWeather = require('../utilities/utils').parseCurrentWeather
 let parseWeather = require('../utilities/utils').parseWeather
 let parseForecast = require('../utilities/utils').parseForecast
 
@@ -53,9 +54,10 @@ router.get('/location', (req, res) => {
             `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${long}&exclude=${excludeParams}&units=imperial&appid=${process.env.WEATHER_KEY}`)
         .then(weatherRes => {
             weatherData = weatherRes.data
-            forecast = parseForecast(weatherData.hourly);
-            for(let i = 0; i < 7; i++) {
-                temperatures.push(parseWeather(weatherData.daily[i]));
+            forecast = parseForecast(weatherData.hourly)
+            temperatures.push(parseCurrentWeather(weatherData.current))
+            for(let i = 1; i < 7; i++) {
+                temperatures.push(parseWeather(weatherData.daily[i]))
             }
             res.json({
                 forecast: forecast,
@@ -74,8 +76,5 @@ router.get('/location', (req, res) => {
         })
     }
 });
-
-
-
 
 module.exports = router
