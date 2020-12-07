@@ -26,8 +26,31 @@ function sendMessageToIndividual(token, message) {
   })
 }
 
-//add other "sendYypeToIndividual" functions here. Don't forget to exprot them
+//add other "sendTypeToIndividual" functions here. Don't forget to export them
+
+//use to send message to a specific client by the token
+function sendCreateRoomMessageToIndividual(token, roomName) {
+
+  //build the message for Pushy to send
+  const data = {
+    "type": "newRoom",
+    roomName
+  };
+
+  // Send push notification via the Send Notifications API
+  // https://pushy.me/docs/api/send-notifications
+  pushyAPI.sendPushNotification(data, token, {}, function (err, id) {
+    // Log errors to console
+    if (err) {
+      return console.log('Fatal Error', err);
+    }
+
+    // Log success
+    console.log('Push sent successfully! (ID: ' + id + ')')
+  })
+}
 
 module.exports = {
-  sendMessageToIndividual
+  sendMessageToIndividual,
+  sendCreateRoomMessageToIndividual
 };
