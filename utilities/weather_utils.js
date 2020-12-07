@@ -41,8 +41,6 @@ function parseForecast(hourlyData) {
     return data
 }
 
-
-
 function getDate(dt) {
     let days = { 0:'Sun ', 1:'Mon ', 2:'Tue ', 3:'Wed ', 4:'Th ', 5:'Fri ', 6:'Sat '}
     let time = new Date(dt * 1000)

@@ -6,6 +6,7 @@ router.use(express.json())
 
 const axios = require('axios')
 const zipcodes = require('zipcodes')
+const cities = require('cities')
 
 let parseCurrentWeather = require('../utilities/weather_utils').parseCurrentWeather
 let parseWeather = require('../utilities/weather_utils').parseWeather
@@ -48,6 +49,8 @@ router.get('/location', (req, res) => {
     }   
 
     if (lat && long) {
+        const cityData = cities.gpsLookup(lat, long);
+
         temperatures = []
         excludeParams = "minutely,alerts"
         axios.get(
@@ -60,6 +63,8 @@ router.get('/location', (req, res) => {
                 temperatures.push(parseWeather(weatherData.daily[i]))
             }
             res.json({
+                city: cityData.city,
+                state: cityData.state_abbr,
                 forecast: forecast,
                 daily: temperatures
             })
