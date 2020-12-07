@@ -205,10 +205,21 @@ router.put("/:chatId/", (request, response, next) => {
                       WHERE memberid=$1`;
       let values = [id];
       pool.query(query, values)
-        .then(result => {
-          msg_functions.sendCreateRoomMessageToIndividual(
-            result.rows[0].token,
-            request.body.name);
+        .then((result) => {
+          let query = 'SELECT * FROM CHATS WHERE ChatId=$1';
+          let values = [request.params.chatId];
+          pool.query(query, values)
+            .then(chat => {
+              msg_functions.sendCreateRoomMessageToIndividual(
+                result.rows[0].token,
+                chat.rows[0].name);
+              })
+            .catch(error => {
+              response.status(400).send({
+                message: "SQL Error",
+                error: error
+              })
+            })
         });
     }
     response.send({
