@@ -200,6 +200,16 @@ router.put("/:chatId/", (request, response, next) => {
     const chatRoomId = request.params.chatId;
     for (const id of request.body.memberIds) {
       addUserToChatRoom(chatRoomId, id);
+      // send a notification of this message to ALL members with registered tokens
+      let query = `SELECT token FROM Push_Token
+                      WHERE memberid=$1`;
+      let values = [id];
+      pool.query(query, values)
+        .then(result => {
+          msg_functions.sendCreateRoomMessageToIndividual(
+            result.rows[0].token,
+            request.body.name);
+        });
     }
     response.send({
       sucess: true,
