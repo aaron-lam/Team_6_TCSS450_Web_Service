@@ -9,6 +9,8 @@ const router = express.Router();
 //This allows parsing of the body of POST requests, that are encoded in JSON
 router.use(require("body-parser").json());
 
+const msg_functions = require('../../utilities/utils').messaging;
+
 /**
  * @apiDefine JSONError
  * @apiError (400: JSON Error) {String} message "malformed JSON in parameters"
@@ -56,13 +58,24 @@ router.post("/", (request, response, next) => {
       if (request.body.memberIds) {
         for (const id of request.body.memberIds) {
           addUserToChatRoom(chatRoomId, id);
+          // send a notification of this message to ALL members with registered tokens
+          let query = `SELECT token FROM Push_Token
+                      WHERE memberid=$1`;
+          let values = [id];
+          pool.query(query, values)
+            .then(result => {
+              msg_functions.sendCreateRoomMessageToIndividual(
+                result.rows.token,
+                request.body.name);
+            });
         }
       }
       response.send({
         sucess: true,
         chatID: chatRoomId
       });
-    }).catch(err => {
+    })
+  .catch(err => {
     response.status(400).send({
       message: "SQL Error",
       error: err
