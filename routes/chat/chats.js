@@ -65,7 +65,7 @@ router.post("/", (request, response, next) => {
           pool.query(query, values)
             .then(result => {
               msg_functions.sendCreateRoomMessageToIndividual(
-                result.rows.token,
+                result.rows[0].token,
                 request.body.name);
             });
         }
