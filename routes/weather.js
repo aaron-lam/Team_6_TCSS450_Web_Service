@@ -11,7 +11,7 @@ const cities = require('cities')
 let parseCurrentWeather = require('../utilities/weather_utils').parseCurrentWeather
 let parseWeather = require('../utilities/weather_utils').parseWeather
 let parseForecast = require('../utilities/weather_utils').parseForecast
-
+let validZipcode = require('../utilities/weather_utils').validZipcode
 
 /**
  * @apiDefine JSONError
@@ -43,9 +43,21 @@ router.get('/location', (req, res) => {
     let zipcode = req.headers.zipcode
 
     if(zipcode) {
-        const zipcodeInfo = zipcodes.lookup(zipcode);
-        lat = zipcodeInfo.latitude
-        long = zipcodeInfo.longitude
+        if(validZipcode(zipcode)) {
+            const zipcodeInfo = zipcodes.lookup(zipcode)
+            if(zipcodeInfo) {
+                lat = zipcodeInfo.latitude
+                long = zipcodeInfo.longitude
+            } else {
+                return res.status(400).send({
+                    message: "Invalid Zip Code"
+                })
+            }
+        } else {
+            return res.status(400).send({
+                message: "Invalid Zip Code"
+            })    
+        }
     }   
 
     if (lat && long) {

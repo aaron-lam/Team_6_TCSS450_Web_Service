@@ -47,7 +47,12 @@ function getDate(dt) {
     return days[time.getDay()] + time.getDate();
 }
 
+function validZipcode(zipcode) {
+    //regex for zipcode 
+    return /(^\d{5}$)|(^\d{5}-\d{4}$)/.test(zipcode);
+}
+
 
 module.exports = {
-    parseCurrentWeather, parseWeather, parseForecast
+    parseCurrentWeather, parseWeather, parseForecast, validZipcode
 }
