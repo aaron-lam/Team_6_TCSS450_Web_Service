@@ -4,6 +4,7 @@ let pool = require('../../utilities/utils').pool
 
 var router = express.Router()
 const bodyParser = require("body-parser")
+const pushyFunctions = require('../../utilities/utils').messaging
 
 router.use(bodyParser.json())
 
@@ -95,12 +96,26 @@ router.post('/', (request, response, next) => {
                 // final query
                 pool.query(query,values)
                 .then(result => {
+                    query = `SELECT token FROM Push_Token
+                    WHERE memberid=$1`;
+                    values = [userToAdd];
+                    pool.query(query, values)
+                    .then(result => {
+
+                    })
+                    .catch(error => {
+                        response.status(400).send({
+                            message: "SQL Error on retrieving PUSHY token",
+                            error: error
+                        })  
+                    })
+
                     response.send({
                         success: true
                      })
                 }).catch(error => {
                     response.status(400).send({
-                        message: "SQL Error on final query",
+                        message: "SQL Error on fourth query",
                         error: error
                     })
                 })
