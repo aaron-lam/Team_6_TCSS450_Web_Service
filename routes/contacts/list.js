@@ -11,8 +11,8 @@ router.use(bodyParser.json())
 router.post('/', (request, response, next) => {
 
     // These will hold the memberId's of the two members involved
-    let userToAdd = null
-    let userThatsAdding = request.decoded.memberid
+    response.locals.usertoAdd = null
+    response.locals.userThatsAdding = request.decoded.memberid
 
     // Check that the username is correctly inputted
     if (!request.body.username) {
@@ -34,7 +34,7 @@ router.post('/', (request, response, next) => {
     .then(result => {
 
         // This catches the user trying to add themselves as a contact
-        if (userToAdd == userThatsAdding) {
+        if (response.locals.userToAdd == response.locals.userThatsAdding) {
             response.status(400).send({
                 message: "User is attempting to add themself.",
             })
@@ -46,18 +46,18 @@ router.post('/', (request, response, next) => {
                 message: "Username does not exist.",
             })
         } else {
-            userToAdd = result.rows[0].memberid // get the userid
+            response.locals.userToAdd = result.rows[0].memberid // get the userid
             next()
         }
     })
 }, (request, response, next) => {
 
     // Next, make sure they're not already contacts with this person.
-    query = `SELECT * 
+    let query = `SELECT * 
     FROM CONTACTS 
     WHERE MEMBERID_A=$1 AND MEMBERID_B=$2 AND VERIFIED=1 
     OR MEMBERID_A=$2 AND MEMBERID_B=$1 AND VERIFIED=1`
-    values = [userThatsAdding,userToAdd]
+    let values = [response.locals.userThatsAdding,response.locals.userToAdd]
 
     // Second query
     pool.query(query,values)
@@ -75,8 +75,8 @@ router.post('/', (request, response, next) => {
 
     // Next, check if they've already sent a request, or have a request open from
     // this person that they haven't responded to.
-    query = 'SELECT * FROM CONTACTS WHERE (MEMBERID_A=$1 AND MEMBERID_B=$2 AND VERIFIED=0) OR (MEMBERID_A=$2 AND MEMBERID_B=$1 AND VERIFIED=0)'
-    values = [userThatsAdding,userToAdd]
+    let query = 'SELECT * FROM CONTACTS WHERE (MEMBERID_A=$1 AND MEMBERID_B=$2 AND VERIFIED=0) OR (MEMBERID_A=$2 AND MEMBERID_B=$1 AND VERIFIED=0)'
+    let values = [response.locals.userThatsAdding,response.locals.userToAdd]
 
     // Third query
     pool.query(query,values)
@@ -85,11 +85,11 @@ router.post('/', (request, response, next) => {
         // This means either they've already sent a request, or they have a request
         // they haven't responded to from the person they're trying to add
         if (result.rows.length > 0) {
-            if (result.rows[0].memberid_a == userThatsAdding) {
+            if (result.rows[0].memberid_a == response.locals.userThatsAdding) {
                 response.status(400).send({
                     message: "You already sent a request to this person and they have not responded.",
                 })
-            } else if (result.rows[0].member_b == userThatsAdding) {
+            } else if (result.rows[0].member_b == response.locals.userThatsAdding) {
                 response.status(400).send({
                     message: "You have an open request from this person. Simply accept it to add them as a contact.",
                 })
@@ -103,8 +103,10 @@ router.post('/', (request, response, next) => {
 }, (request, response) => {
 
     // Finally, if you've made it this far, add the contact request
-    query = `INSERT INTO CONTACTS (MEMBERID_A,MEMBERID_B,VERIFIED)
+    let query = `INSERT INTO CONTACTS (MEMBERID_A,MEMBERID_B,VERIFIED)
     VALUES ($1,$2,0)`
+
+    let values = [response.locals.userThatsAdding,response.locals.userToAdd]
 
     // final query
     pool.query(query,values)
