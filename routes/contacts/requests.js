@@ -43,11 +43,11 @@ router.post('/:memberId', (request, response, next) => {
 
         //get the username of the person that confirmed the contact request
         query = 'SELECT USERNAME FROM MEMBERS WHERE MEMBERID=$1'
-        values = [confirmedMemberId]
+        values = [hostMemberId]
 
         pool.query(query, values) 
         .then(result => {
-            const username = result.rows[0].username
+            const hostUsername = result.rows[0].username
             //send the person that was confirmed a push notification of the 
             //new contact
             query = `SELECT token FROM Push_Token
@@ -55,7 +55,7 @@ router.post('/:memberId', (request, response, next) => {
             values = [confirmedMemberId];
             pool.query(query, values)
             .then(result => {
-                pushyFunctions.sendConfirmContactToIndividual(result.rows[0].token, confirmedMemberId, username)
+                pushyFunctions.sendConfirmContactToIndividual(result.rows[0].token, hostMemberId, hostUsername)
                 return response.status(200).send({
                     success: true
                 })
@@ -121,7 +121,7 @@ router.delete('/:memberId?', (request, response, next) => {
         values = [deniedMemberId];
         pool.query(query, values)
         .then(result => {
-            pushyFunctions.sendDenyContactToIndividual(result.rows[0].token, deniedMemberId)
+            pushyFunctions.sendDenyContactToIndividual(result.rows[0].token, hostMemberId)
             return response.status(200).send({
                 success: true
             })

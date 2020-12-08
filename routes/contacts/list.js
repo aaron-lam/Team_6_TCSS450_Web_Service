@@ -128,22 +128,34 @@ router.post('/', (request, response, next) => {
     // final query
     pool.query(query,values)
     .then(result => {
-        //Send push notification to the user receiving contact request
-        query = `SELECT token FROM Push_Token
-        WHERE MEMBERID=$1`;
-        values = [response.locals.userToAdd];
-        pool.query(query, values)
+
+        //get the username of the person that's creating the contact request
+        query = 'SELECT USERNAME FROM MEMBERS WHERE MEMBERID=$1'
+        values = [response.locals.userThatsAdding]
+
+        pool.query(query, values) 
         .then(result => {
-            pushyFunctions.sendNewContactToIndividual(result.rows[0].token, response.locals.userToAdd, request.body.username)
-            response.send({
-                success: true
+            const userAddingUsername = result.rows[0].username
+            //send the person being added a push notification 
+            //of the contact request
+            query = `SELECT token FROM Push_Token WHERE MemberID=$1`;
+            values = [response.locals.userToAdd];
+            pool.query(query, values)
+            .then(result => {
+                pushyFunctions.sendNewContactToIndividual(result.rows[0].token, 
+                    response.locals.userThatsAdding, userAddingUsername)
+                return response.status(200).send({
+                    success: true
+                })
             })
-        }).catch(error => {
-            response.status(400).send({
-                message: "SQL Error on retrieving PUSHY token",
-                error: error
-            })  
+            .catch(error => {
+                return response.status(400).send({
+                    message: "SQL Error on retrieving PUSHY token",
+                    error: error
+                })  
+            })
         })
+
     }).catch(error => {
         response.status(400).send({
           message: "SQL Error",
@@ -353,7 +365,7 @@ router.delete('/:memberId', (request, response, next) => {
             values = [request.params.memberId];
             pool.query(query, values)
             .then(result => {
-                pushyFunctions.sendDeleteContactToIndividual(result.rows[0].token, request.body.memberId)
+                pushyFunctions.sendDeleteContactToIndividual(result.rows[0].token, request.decoded.memberid)
                 return response.send({
                     success: true
                 })
