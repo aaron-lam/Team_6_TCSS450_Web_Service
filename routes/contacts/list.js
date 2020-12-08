@@ -14,11 +14,10 @@ router.post('/', (request, response, next) => {
     // These will hold the memberId's of the two members involved
     let userToAdd = null
     let userThatsAdding = request.decoded.memberid
-
     // Check that the username is correctly inputted
     if (!request.body.username) {
-        response.status(400).send({
-            message: "Missing required information",
+        return response.status(400).send({
+            message: "Missing username",
         })
     }
 
@@ -34,7 +33,7 @@ router.post('/', (request, response, next) => {
 
         // If there are no results, the username doesn't exist in the system.
         if (result.rows.length == 0) {
-            response.status(400).send({
+            return response.status(400).send({
                 message: "Username does not exist.",
             })
         } else {
@@ -43,7 +42,7 @@ router.post('/', (request, response, next) => {
 
         // This catches the user trying to add themselves as a contact
         if (userToAdd == userThatsAdding) {
-            response.status(400).send({
+            return response.status(400).send({
                 message: "User is attempting to add themself.",
             })
         }
@@ -61,7 +60,7 @@ router.post('/', (request, response, next) => {
 
             // If you get any rows in response, they're already contacts. Send an error.
             if (result.rows.length > 0) {
-                response.status(400).send({
+                return response.status(400).send({
                     message: "You are already contacts with this person.",
                 })
             }
@@ -79,11 +78,11 @@ router.post('/', (request, response, next) => {
                 // they haven't responded to from the person they're trying to add
                 if (result.rows.length > 0) {
                     if (result.rows[0].memberid_a == userThatsAdding) {
-                        response.status(400).send({
+                        return response.status(400).send({
                             message: "You already sent a request to this person and they have not responded.",
                         })
                     } else {
-                        response.status(400).send({
+                        return response.status(400).send({
                             message: "You have an open request from this person. Simply accept it to add them as a contact.",
                         })
                     }
@@ -102,40 +101,36 @@ router.post('/', (request, response, next) => {
                     pool.query(query, values)
                     .then(result => {
                         pushyFunctions.sendNewContactToIndividual(result.rows[0].token, userToAdd, request.body.username)
-                        response.send({
+                        return response.send({
                             success: true
                         })
                     })
                     .catch(error => {
-                        response.status(400).send({
+                        return response.status(400).send({
                             message: "SQL Error on retrieving PUSHY token",
                             error: error
                         })  
                     })
-
-                    response.send({
-                        success: true
-                     })
                 }).catch(error => {
-                    response.status(400).send({
+                    return response.status(400).send({
                         message: "SQL Error on fourth query",
                         error: error
                     })
                 })
             }).catch(error => {
-                response.status(400).send({
+                return response.status(400).send({
                     message: "SQL Error on third query",
                     error: error
                 })
             })
         }).catch(error => {
-            response.status(400).send({
+            return response.status(400).send({
                 message: "SQL Error on second query",
                 error: error
             })
         })
     }).catch(error => {
-        response.status(400).send({
+        return response.status(400).send({
             message: "SQL Error on first query",
             error: error
         })
@@ -331,12 +326,31 @@ router.delete('/:memberId?', (request, response, next) => {
         })
 }, (request, response) => {
     let insert = `DELETE FROM Contacts
-                  WHERE MemberID_A=$1
-                  AND MemberID_B=$2
+                  WHERE (MemberID_A=$1 AND MemberID_B=$2) OR 
+                  (MemberID_A=$2 AND MemberID_B=$1)
                   RETURNING *`
     let values = [request.decoded.memberid, request.params.memberId]
     pool.query(insert, values)
         .then(result=> {
+            console.log(result);
+            //send pushy notification to the user that was deleted
+            let query = `SELECT token FROM Push_Token
+            WHERE memberid=$1`;
+            values = [request.params.memberId];
+            pool.query(query, values)
+            .then(result => {
+                pushyFunctions.sendDeleteContactToIndividual(result.rows[0].token, request.body.memberId)
+                return response.send({
+                    success: true
+                })
+            })
+            .catch(error => {
+                return response.status(400).send({
+                    message: "SQL Error on retrieving PUSHY token",
+                    error: error
+                })  
+            })
+
             response.send({
                 success: true
             })
