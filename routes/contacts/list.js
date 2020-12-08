@@ -116,6 +116,11 @@ router.post('/', (request, response, next) => {
                 error: error
             })
         })
+    }).catch(error => {
+        response.status(400).send({
+            message: "SQL Error on first query",
+            error: error
+        })
     })
 })
 
