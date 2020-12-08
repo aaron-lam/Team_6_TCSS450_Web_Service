@@ -7,7 +7,7 @@ const bodyParser = require("body-parser")
 
 router.use(bodyParser.json())
 
-// Add a new contact request
+// Add a new contact
 router.post('/', (request, response, next) => {
 
     // These will hold the memberId's of the two members involved
@@ -327,8 +327,8 @@ router.delete('/:memberId?', (request, response, next) => {
         })
 }, (request, response) => {
     let insert = `DELETE FROM Contacts
-                  WHERE MemberID_A=$1
-                  AND MemberID_B=$2
+                  WHERE 
+                  (MemberID_A=$1 AND MemberID_B=$2) or (MemberID_A=$2 AND MemberID_B=$1)
                   RETURNING *`
     let values = [request.decoded.memberid, request.params.memberId]
     pool.query(insert, values)
