@@ -5,16 +5,17 @@ let pool = require('../../utilities/utils').pool
 var router = express.Router()
 const bodyParser = require("body-parser")
 const { prependOnceListener } = require('../../utilities/sql_conn')
+const pushyFunctions = require('../../utilities/utils').messaging
 
 router.use(bodyParser.json())
 
 
 /** CONFIRM a request
  * 
- * Takes a memberId in the body
+ * Takes a memberId in the params
  * 
  */
-router.post('/:memberId?', (request, response, next) => {
+router.post('/:memberId', (request, response, next) => {
    // Check for no parameter
    if (!request.params.memberId) {
       response.status(400).send({
@@ -29,14 +30,49 @@ router.post('/:memberId?', (request, response, next) => {
       let confirmedMemberId = request.params.memberId
       let hostMemberId = request.decoded.memberid
 
-      let query = 'UPDATE CONTACTS SET VERIFIED=1 WHERE MEMBERID_A=$1 AND MEMBERID_B=$2'
+      let query = 'UPDATE CONTACTS SET VERIFIED=1 WHERE MEMBERID_A=$1 AND MEMBERID_B=$2 RETURNING *'
       let values = [confirmedMemberId,hostMemberId]
-
       pool.query(query,values)
       .then(result => {
-         response.send({
-            result: "success"
-         })
+        //check if the contact request exists
+         if(result.rows.length == 0) {
+            return response.status(400).send({
+                message: "Contact request does not exist.",
+            })
+         }
+
+        //get the username of the person that confirmed the contact request
+        query = 'SELECT USERNAME FROM MEMBERS WHERE MEMBERID=$1'
+        values = [hostMemberId]
+
+        pool.query(query, values) 
+        .then(result => {
+            const hostUsername = result.rows[0].username
+            //send the person that was confirmed a push notification of the 
+            //new contact
+            query = `SELECT token FROM Push_Token
+            WHERE memberid=$1`;
+            values = [confirmedMemberId];
+            pool.query(query, values)
+            .then(result => {
+                pushyFunctions.sendConfirmContactToIndividual(result.rows[0].token, hostMemberId, hostUsername)
+                return response.status(200).send({
+                    success: true
+                })
+            })
+            .catch(error => {
+                return response.status(400).send({
+                    message: "SQL Error on retrieving PUSHY token",
+                    error: error
+                })  
+            })
+        })
+        .catch(error => {
+            return response.status(400).send({
+                message: "SQL Error on retrieving username",
+                error: error
+            })  
+        })
       }).catch(error => {
          response.status(400).send({
             message: "SQL Error ____",
@@ -66,14 +102,30 @@ router.delete('/:memberId?', (request, response, next) => {
       let deniedMemberId = request.params.memberId
       let hostMemberId = request.decoded.memberid
 
-      let query = 'DELETE FROM CONTACTS WHERE MEMBERID_A=$1 AND MEMBERID_B=$2 AND VERIFIED=0'
+      let query = 'DELETE FROM CONTACTS WHERE MEMBERID_A=$1 AND MEMBERID_B=$2' + 
+                     'AND VERIFIED=0 RETURNING *'
       let values = [deniedMemberId,hostMemberId]
 
       pool.query(query,values)
       .then(result => {
-         response.send({
-            result: "success"
-         })
+
+        if(result.rows.length == 0) {
+            return response.status(400).send({
+                message: "Contact Request does not exist",
+            })           
+        }
+
+        //send the person that was denied a push notification
+        query = `SELECT token FROM Push_Token
+        WHERE memberid=$1`;
+        values = [deniedMemberId];
+        pool.query(query, values)
+        .then(result => {
+            pushyFunctions.sendDenyContactToIndividual(result.rows[0].token, hostMemberId)
+            return response.status(200).send({
+                success: true
+            })
+        })
       }).catch(error => {
          response.status(400).send({
             message: "SQL Error ____",

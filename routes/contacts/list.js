@@ -4,6 +4,7 @@ let pool = require('../../utilities/utils').pool
 
 var router = express.Router()
 const bodyParser = require("body-parser")
+const pushyFunctions = require('../../utilities/utils').messaging
 
 router.use(bodyParser.json())
 
@@ -127,9 +128,34 @@ router.post('/', (request, response, next) => {
     // final query
     pool.query(query,values)
     .then(result => {
-        response.send({
-            success: true
+
+        //get the username of the person that's creating the contact request
+        query = 'SELECT USERNAME FROM MEMBERS WHERE MEMBERID=$1'
+        values = [response.locals.userThatsAdding]
+
+        pool.query(query, values) 
+        .then(result => {
+            const userAddingUsername = result.rows[0].username
+            //send the person being added a push notification 
+            //of the contact request
+            query = `SELECT token FROM Push_Token WHERE MemberID=$1`;
+            values = [response.locals.userToAdd];
+            pool.query(query, values)
+            .then(result => {
+                pushyFunctions.sendNewContactToIndividual(result.rows[0].token, 
+                    response.locals.userThatsAdding, userAddingUsername)
+                return response.status(200).send({
+                    success: true
+                })
+            })
+            .catch(error => {
+                return response.status(400).send({
+                    message: "SQL Error on retrieving PUSHY token",
+                    error: error
+                })  
+            })
         })
+
     }).catch(error => {
         response.status(400).send({
           message: "SQL Error",
@@ -273,7 +299,7 @@ router.get('/:memberId?', (request, response, next) => {
  *
  * @apiUse JSONError
  */
-router.delete('/:memberId?', (request, response, next) => {
+router.delete('/:memberId', (request, response, next) => {
     // Check for no parameter
     if (!request.params.memberId) {
         response.status(400).send({
@@ -321,24 +347,37 @@ router.delete('/:memberId?', (request, response, next) => {
             }
         }).catch(error => {
             response.status(400).send({
-                message: "SQL Error",
+                message: "SQL Error On Checking Contacts",
                 error: error
             })
         })
 }, (request, response) => {
+
     let insert = `DELETE FROM Contacts
-                  WHERE 
-                  (MemberID_A=$1 AND MemberID_B=$2) or (MemberID_A=$2 AND MemberID_B=$1)
+                  WHERE (MemberID_A=$1 AND MemberID_B=$2) OR 
+                  (MemberID_A=$2 AND MemberID_B=$1)
                   RETURNING *`
     let values = [request.decoded.memberid, request.params.memberId]
     pool.query(insert, values)
         .then(result=> {
-            response.send({
-                success: true
+            //send pushy notification to the user that was deleted
+            let query = `SELECT token FROM Push_Token WHERE MemberID=$1`;
+            values = [request.params.memberId];
+            pool.query(query, values)
+            .then(result => {
+                pushyFunctions.sendDeleteContactToIndividual(result.rows[0].token, request.decoded.memberid)
+                return response.send({
+                    success: true
+                })
+            }).catch(error => {
+                return response.status(400).send({
+                    message: "SQL Error on retrieving PUSHY token",
+                    error: error
+                })  
             })
         }).catch(err => {
             response.status(400).send({
-                message: "SQL Error",
+                message: "SQL Error On Deleting Contact",
                 error: err
             })
         })
