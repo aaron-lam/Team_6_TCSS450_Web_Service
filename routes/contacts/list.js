@@ -7,104 +7,124 @@ const bodyParser = require("body-parser")
 
 router.use(bodyParser.json())
 
-/**
- * @apiDefine JSONError
- * @apiError (400: JSON Error) {String} message "malformed JSON in parameters"
- */
-
-/**
- * @api {post} /contacts Request to add a contact to the user's contact list
- * @apiName PostContacts
- * @apiGroup Contacts
- *
- * @apiHeader {String} authorization Valid JSON Web Token JWT
- * @apiParam {Number} memberId the memberId of the contact to be added
- *
- * @apiSuccess (Success 200) {boolean} success true when the contact is added
- *
- * @apiError (400: Duplicate contact) {String} message "Contact already exists"
- *
- * @apiError (400: Missing Parameters) {String} message "Missing required information"
- *
- * @apiError (400: SQL Error) {String} message the reported SQL error details
- *
- * @apiError (400: memberId Error) {String} message "Malformed parameter. memberId must be a number"
- *
- * @apiError (400: Contact memberId does not exist) {String} message "Added User's ID not found"
- *
- * @apiUse JSONError
- */
+// Add a new contact request
 router.post('/', (request, response, next) => {
-    // Check for empty parameters
-    if (!request.body.memberId) {
+
+    // These will hold the memberId's of the two members involved
+    let userToAdd = null
+    let userThatsAdding = request.decoded.memberid
+
+    // Check that the username is correctly inputted
+    if (!request.body.username) {
         response.status(400).send({
-            message: "LIST Missing required information"
+            message: "Missing required information",
         })
-    } else if (isNaN(request.body.memberId)) {
-        response.status(400).send({
-            message: "LIST Malformed parameter. memberId must be a number"
-        })
-    } else {
-        next()
     }
-}, (request, response, next) => {
-    //validate memberId exists
-    let query = 'SELECT * FROM MEMBERS WHERE MemberID=$1'
-    let values = [request.body.memberId]
 
-    pool.query(query, values)
-        .then(result=> {
-            if (result.rowCount == 0) {
+    // Get the memberid for the username given. Also making sure it exists
+    let query = `SELECT MEMBERID
+                 FROM MEMBERS
+                 WHERE USERNAME=$1`
+    let values = [request.body.username]
+
+    // First query
+    pool.query(query,values)
+    .then(result => {
+
+        // If there are no results, the username doesn't exist in the system.
+        if (result.rows.length == 0) {
+            response.status(400).send({
+                message: "Username does not exist.",
+            })
+        } else {
+            userToAdd = result.rows[0].memberid // get the userid
+        }
+
+        // This catches the user trying to add themselves as a contact
+        if (usertoAdd == userThatsAdding) {
+            response.status(400).send({
+                message: "User is attempting to add themself.",
+            })
+        }
+
+        // Next, make sure they're not already contacts with this person.
+        query = `SELECT * 
+                    FROM CONTACTS 
+                    WHERE MEMBERID_A=$1 AND MEMBERID_B=$2 AND VERIFIED=1 
+                    OR MEMBERID_A=$2 AND MEMBERID_B=$1 AND VERIFIED=1`
+        values = [userThatsAdding,userToAdd]
+
+        // Second query
+        pool.query(query,values)
+        .then(result => {
+
+            // If you get any rows in response, they're already contacts. Send an error.
+            if (result.rows.length > 0) {
                 response.status(400).send({
-                    message: "Added User's ID not found"
+                    message: "You are already contacts with this person.",
                 })
-            } else {
-                next()
             }
+            
+            // Next, check if they've already sent a request, or have a request open from
+            // this person that they haven't responded to.
+            query = 'SELECT * FROM CONTACTS WHERE (MEMBERID_A=$1 AND MEMBERID_B=$2 AND VERIFIED=0) OR (MEMBERID_A=$2 AND MEMBERID_B=$1 AND VERIFIED=0)'
+            values = [userThatsAdding,userToAdd]
+    
+            // Third query
+            pool.query(query,values)
+            .then(result => {
+
+                // This means either they've already sent a request, or they have a request
+                // they haven't responded to from the person they're trying to add
+                if (result.rows.length > 0) {
+                    if (result.rows[0].memberid_a == userThatsAdding) {
+                        response.status(400).send({
+                            message: "You already sent a request to this person and they have not responded.",
+                        })
+                    } else {
+                        response.status(400).send({
+                            message: "You have an open request from this person. Simply accept it to add them as a contact.",
+                        })
+                    }
+                }
+    
+                // Finally, if you've made it this far, add the contact request
+                query = `INSERT INTO CONTACTS (MEMBERID_A,MEMBERID_B,VERIFIED)
+                         VALUES ($1,$2,0)`
+                
+                // final query
+                pool.query(query,values)
+                .then(result => {
+                    response.send({
+                        success: true
+                     })
+                }).catch(error => {
+                    response.status(400).send({
+                        message: "SQL Error on final query",
+                        error: error
+                    })
+                })
+            }).catch(error => {
+                response.status(400).send({
+                    message: "SQL Error on third query",
+                    userToAdd: userToAdd,
+                    userThatsAdding: userThatsAdding,
+                    error: error
+                })
+            })
         }).catch(error => {
             response.status(400).send({
-                message: "SQL Error on memberId check",
+                message: "SQL Error on second query",
                 error: error
             })
         })
-}, (request, response, next) => {
-    // check for duplicate contact
-    let query = 'SELECT * FROM CONTACTS WHERE (MemberID_A=$1 AND MemberID_B=$2) OR (MemberID_A=$2 AND MemberID_B=$1)'
-    let values = [request.decoded.memberid, request.body.memberId]
-
-    pool.query(query, values)
-        .then(result=> {
-            if (result.rowCount > 0) {
-                response.status(400).send({
-                    message: "Contact already exists",
-                })
-            } else {
-                next()
-            }
-        }).catch(error => {
-            response.status(400).send({
-                message: "SQL Error on memberId check",
-                error: error
-            })
+    }).catch(error => {
+        response.status(400).send({
+            message: "SQL Error on first query",
+            error: error
         })
-}, (request, response) => {
-    let insert = `INSERT INTO Contacts(MemberID_A, MemberID_B)
-                  VALUES ($1, $2)
-                  RETURNING *`
-    let values = [request.decoded.memberid, request.body.memberId]
-    pool.query(insert, values)
-        .then(result=> {
-            response.send({
-                success: true
-            })
-        }).catch(err => {
-            response.status(400).send({
-                message: "SQL Error",
-                error: err
-            })
-        })
+    })
 })
-
 
 /**
  * @api {get} /contacts/:memberId? Request to view a contact

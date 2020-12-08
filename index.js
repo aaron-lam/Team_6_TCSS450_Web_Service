@@ -51,7 +51,7 @@ app.use("/contacts", middleware.checkToken, require("./routes/contacts/list"));
 /**
  * Route for users to confirm or deny contact requests
  */
-app.use("/requests", middleware.checkToken, require("./routes/contacts/requests"));
+app.use("/contactRequests", middleware.checkToken, require("./routes/contacts/requests"));
 
 /**
  * Route for users to get weather information

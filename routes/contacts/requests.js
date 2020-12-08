@@ -9,7 +9,7 @@ const { prependOnceListener } = require('../../utilities/sql_conn')
 router.use(bodyParser.json())
 
 
-/** CONFIRM
+/** CONFIRM a request
  * 
  * Takes a memberId in the body
  * 
@@ -46,7 +46,7 @@ router.post('/:memberId?', (request, response, next) => {
    }
 })
 
-/** DENY
+/** DENY a request
  * 
  * Takes a memberId in the body
  * 
