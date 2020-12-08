@@ -32,13 +32,6 @@ router.post('/', (request, response, next) => {
 
     pool.query(query,values)
     .then(result => {
-
-        // This catches the user trying to add themselves as a contact
-        if (response.locals.userToAdd == response.locals.userThatsAdding) {
-            response.status(400).send({
-                message: "User is attempting to add themself.",
-            })
-        }
         
         // If there are no results, the username doesn't exist in the system.
         if (result.rows.length == 0) {
@@ -47,7 +40,15 @@ router.post('/', (request, response, next) => {
             })
         } else {
             response.locals.userToAdd = result.rows[0].memberid // get the userid
-            next()
+
+            // This catches the user trying to add themselves as a contact
+            if (response.locals.userToAdd == response.locals.userThatsAdding) {
+                response.status(400).send({
+                    message: "User is attempting to add themself.",
+                })
+            } else{
+                next()
+            }
         }
     })
 }, (request, response, next) => {
