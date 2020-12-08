@@ -84,10 +84,28 @@ function sendDeleteContactToIndividual(token, userId, username) {
   })
 }
 
+function sendConfirmContactToIndividual(token, userId, username) {
+  const data = {
+    "type": "confirmContact",
+    userId,
+    username
+  }
+
+  pushyAPI.sendPushNotification(data, token, {}, function (err, id) {
+    // Log errors to console
+    if (err) {
+      return console.log('Fatal Error', err);
+    }
+    // Log success
+    console.log('Push sent successfully! (ID: ' + id + ')')
+  })
+}
+
 
 module.exports = {
   sendMessageToIndividual,
   sendCreateRoomMessageToIndividual,
   sendNewContactToIndividual,
-  sendDeleteContactToIndividual
+  sendDeleteContactToIndividual,
+  sendConfirmContactToIndividual
 };
