@@ -41,7 +41,7 @@ router.post('/', (request, response, next) => {
         }
 
         // This catches the user trying to add themselves as a contact
-        if (usertoAdd == userThatsAdding) {
+        if (userToAdd == userThatsAdding) {
             response.status(400).send({
                 message: "User is attempting to add themself.",
             })
@@ -107,8 +107,6 @@ router.post('/', (request, response, next) => {
             }).catch(error => {
                 response.status(400).send({
                     message: "SQL Error on third query",
-                    userToAdd: userToAdd,
-                    userThatsAdding: userThatsAdding,
                     error: error
                 })
             })
@@ -117,11 +115,6 @@ router.post('/', (request, response, next) => {
                 message: "SQL Error on second query",
                 error: error
             })
-        })
-    }).catch(error => {
-        response.status(400).send({
-            message: "SQL Error on first query",
-            error: error
         })
     })
 })
