@@ -287,7 +287,7 @@ router.get('/:memberId?', (request, response, next) => {
  *
  * @apiUse JSONError
  */
-router.delete('/:memberId?', (request, response, next) => {
+router.delete('/:memberId', (request, response, next) => {
     // Check for no parameter
     if (!request.params.memberId) {
         response.status(400).send({
@@ -335,24 +335,37 @@ router.delete('/:memberId?', (request, response, next) => {
             }
         }).catch(error => {
             response.status(400).send({
-                message: "SQL Error",
+                message: "SQL Error On Checking Contacts",
                 error: error
             })
         })
 }, (request, response) => {
+
     let insert = `DELETE FROM Contacts
-                  WHERE 
-                  (MemberID_A=$1 AND MemberID_B=$2) or (MemberID_A=$2 AND MemberID_B=$1)
+                  WHERE (MemberID_A=$1 AND MemberID_B=$2) OR 
+                  (MemberID_A=$2 AND MemberID_B=$1)
                   RETURNING *`
     let values = [request.decoded.memberid, request.params.memberId]
     pool.query(insert, values)
         .then(result=> {
-            response.send({
-                success: true
+            //send pushy notification to the user that was deleted
+            let query = `SELECT token FROM Push_Token WHERE MemberID=$1`;
+            values = [request.params.memberId];
+            pool.query(query, values)
+            .then(result => {
+                pushyFunctions.sendDeleteContactToIndividual(result.rows[0].token, request.body.memberId)
+                return response.send({
+                    success: true
+                })
+            }).catch(error => {
+                return response.status(400).send({
+                    message: "SQL Error on retrieving PUSHY token",
+                    error: error
+                })  
             })
         }).catch(err => {
             response.status(400).send({
-                message: "SQL Error",
+                message: "SQL Error On Deleting Contact",
                 error: err
             })
         })
