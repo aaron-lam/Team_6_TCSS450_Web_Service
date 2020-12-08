@@ -50,6 +50,11 @@ router.post('/', (request, response, next) => {
                 next()
             }
         }
+    }).catch(error => {
+        response.status(400).send({
+          message: "SQL Error",
+          error: error
+        })
     })
 }, (request, response, next) => {
 
@@ -71,6 +76,11 @@ router.post('/', (request, response, next) => {
         } else {
             next()
         }
+    }).catch(error => {
+        response.status(400).send({
+          message: "SQL Error",
+          error: error
+        })
     })
 }, (request, response, next) => {
 
@@ -100,6 +110,11 @@ router.post('/', (request, response, next) => {
         } else {
             next()
         }        
+    }).catch(error => {
+        response.status(400).send({
+          message: "SQL Error",
+          error: error
+        })
     })
 }, (request, response) => {
 
