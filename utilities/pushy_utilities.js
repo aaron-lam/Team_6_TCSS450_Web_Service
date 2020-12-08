@@ -50,9 +50,10 @@ function sendCreateRoomMessageToIndividual(token, roomName) {
   })
 }
 
-function sendNewContactToIndividual(token, username) {
+function sendNewContactToIndividual(token, userId, username) {
   const data = {
     "type": "newContact",
+    userId,
     username
   }
   // Send push notification via the Send Notifications API

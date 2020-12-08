@@ -101,7 +101,7 @@ router.post('/', (request, response, next) => {
                     values = [userToAdd];
                     pool.query(query, values)
                     .then(result => {
-                        pushyFunctions.sendNewContactToIndividual(result.rows[0].token, request.body.username)
+                        pushyFunctions.sendNewContactToIndividual(result.rows[0].token, userToAdd, request.body.username)
                         response.send({
                             success: true
                         })
