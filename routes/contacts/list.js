@@ -19,7 +19,10 @@ router.post('/', (request, response, next) => {
         response.status(400).send({
             message: "Missing required information",
         })
+    } else {
+        next()
     }
+}, (request, response, next) => {
 
     // Get the memberid for the username given. Also making sure it exists
     let query = `SELECT MEMBERID
@@ -27,18 +30,8 @@ router.post('/', (request, response, next) => {
                  WHERE USERNAME=$1`
     let values = [request.body.username]
 
-    // First query
     pool.query(query,values)
     .then(result => {
-
-        // If there are no results, the username doesn't exist in the system.
-        if (result.rows.length == 0) {
-            response.status(400).send({
-                message: "Username does not exist.",
-            })
-        } else {
-            userToAdd = result.rows[0].memberid // get the userid
-        }
 
         // This catches the user trying to add themselves as a contact
         if (userToAdd == userThatsAdding) {
@@ -46,80 +39,83 @@ router.post('/', (request, response, next) => {
                 message: "User is attempting to add themself.",
             })
         }
-
-        // Next, make sure they're not already contacts with this person.
-        query = `SELECT * 
-                    FROM CONTACTS 
-                    WHERE MEMBERID_A=$1 AND MEMBERID_B=$2 AND VERIFIED=1 
-                    OR MEMBERID_A=$2 AND MEMBERID_B=$1 AND VERIFIED=1`
-        values = [userThatsAdding,userToAdd]
-
-        // Second query
-        pool.query(query,values)
-        .then(result => {
-
-            // If you get any rows in response, they're already contacts. Send an error.
-            if (result.rows.length > 0) {
-                response.status(400).send({
-                    message: "You are already contacts with this person.",
-                })
-            }
-            
-            // Next, check if they've already sent a request, or have a request open from
-            // this person that they haven't responded to.
-            query = 'SELECT * FROM CONTACTS WHERE (MEMBERID_A=$1 AND MEMBERID_B=$2 AND VERIFIED=0) OR (MEMBERID_A=$2 AND MEMBERID_B=$1 AND VERIFIED=0)'
-            values = [userThatsAdding,userToAdd]
-    
-            // Third query
-            pool.query(query,values)
-            .then(result => {
-
-                // This means either they've already sent a request, or they have a request
-                // they haven't responded to from the person they're trying to add
-                if (result.rows.length > 0) {
-                    if (result.rows[0].memberid_a == userThatsAdding) {
-                        response.status(400).send({
-                            message: "You already sent a request to this person and they have not responded.",
-                        })
-                    } else {
-                        response.status(400).send({
-                            message: "You have an open request from this person. Simply accept it to add them as a contact.",
-                        })
-                    }
-                }
-    
-                // Finally, if you've made it this far, add the contact request
-                query = `INSERT INTO CONTACTS (MEMBERID_A,MEMBERID_B,VERIFIED)
-                         VALUES ($1,$2,0)`
-                
-                // final query
-                pool.query(query,values)
-                .then(result => {
-                    response.send({
-                        success: true
-                     })
-                }).catch(error => {
-                    response.status(400).send({
-                        message: "SQL Error on final query",
-                        error: error
-                    })
-                })
-            }).catch(error => {
-                response.status(400).send({
-                    message: "SQL Error on third query",
-                    error: error
-                })
-            })
-        }).catch(error => {
+        
+        // If there are no results, the username doesn't exist in the system.
+        if (result.rows.length == 0) {
             response.status(400).send({
-                message: "SQL Error on second query",
-                error: error
+                message: "Username does not exist.",
             })
+        } else {
+            userToAdd = result.rows[0].memberid // get the userid
+            next()
+        }
+    })
+}, (request, response, next) => {
+
+    // Next, make sure they're not already contacts with this person.
+    query = `SELECT * 
+    FROM CONTACTS 
+    WHERE MEMBERID_A=$1 AND MEMBERID_B=$2 AND VERIFIED=1 
+    OR MEMBERID_A=$2 AND MEMBERID_B=$1 AND VERIFIED=1`
+    values = [userThatsAdding,userToAdd]
+
+    // Second query
+    pool.query(query,values)
+    .then(result => { 
+        // If you get any rows in response, they're already contacts. Send an error.
+        if (result.rows.length > 0) {
+            response.status(400).send({
+                message: "You are already contacts with this person.",
+            })
+        } else {
+            next()
+        }
+    })
+}, (request, response, next) => {
+
+    // Next, check if they've already sent a request, or have a request open from
+    // this person that they haven't responded to.
+    query = 'SELECT * FROM CONTACTS WHERE (MEMBERID_A=$1 AND MEMBERID_B=$2 AND VERIFIED=0) OR (MEMBERID_A=$2 AND MEMBERID_B=$1 AND VERIFIED=0)'
+    values = [userThatsAdding,userToAdd]
+
+    // Third query
+    pool.query(query,values)
+    .then(result => { 
+
+        // This means either they've already sent a request, or they have a request
+        // they haven't responded to from the person they're trying to add
+        if (result.rows.length > 0) {
+            if (result.rows[0].memberid_a == userThatsAdding) {
+                response.status(400).send({
+                    message: "You already sent a request to this person and they have not responded.",
+                })
+            } else if (result.rows[0].member_b == userThatsAdding) {
+                response.status(400).send({
+                    message: "You have an open request from this person. Simply accept it to add them as a contact.",
+                })
+            } else {
+                next()
+            }
+        } else {
+            next()
+        }        
+    })
+}, (request, response) => {
+
+    // Finally, if you've made it this far, add the contact request
+    query = `INSERT INTO CONTACTS (MEMBERID_A,MEMBERID_B,VERIFIED)
+    VALUES ($1,$2,0)`
+
+    // final query
+    pool.query(query,values)
+    .then(result => {
+        response.send({
+            success: true
         })
     }).catch(error => {
         response.status(400).send({
-            message: "SQL Error on first query",
-            error: error
+          message: "SQL Error",
+          error: error
         })
     })
 })

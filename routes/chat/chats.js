@@ -223,7 +223,7 @@ router.put("/:chatId/", (request, response, next) => {
         });
     }
     response.send({
-      sucess: true,
+      success: true,
       chatID: chatRoomId
     });
   }
