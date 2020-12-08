@@ -56,7 +56,7 @@ router.post('/:memberId', (request, response, next) => {
             pool.query(query, values)
             .then(result => {
                 pushyFunctions.sendConfirmContactToIndividual(result.rows[0].token, confirmedMemberId, username)
-                return response.send({
+                return response.status(200).send({
                     success: true
                 })
             })
@@ -102,14 +102,30 @@ router.delete('/:memberId?', (request, response, next) => {
       let deniedMemberId = request.params.memberId
       let hostMemberId = request.decoded.memberid
 
-      let query = 'DELETE FROM CONTACTS WHERE MEMBERID_A=$1 AND MEMBERID_B=$2 AND VERIFIED=0'
+      let query = 'DELETE FROM CONTACTS WHERE MEMBERID_A=$1 AND MEMBERID_B=$2' + 
+                     'AND VERIFIED=0 RETURNING *'
       let values = [deniedMemberId,hostMemberId]
 
       pool.query(query,values)
       .then(result => {
-         response.send({
-            result: "success"
-         })
+
+        if(result.rows.length == 0) {
+            return response.status(400).send({
+                message: "Contact Request does not exist",
+            })           
+        }
+
+        //send the person that was denied a push notification
+        query = `SELECT token FROM Push_Token
+        WHERE memberid=$1`;
+        values = [deniedMemberId];
+        pool.query(query, values)
+        .then(result => {
+            pushyFunctions.sendDenyContactToIndividual(result.rows[0].token, deniedMemberId)
+            return response.status(200).send({
+                success: true
+            })
+        })
       }).catch(error => {
          response.status(400).send({
             message: "SQL Error ____",

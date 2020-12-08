@@ -101,11 +101,27 @@ function sendConfirmContactToIndividual(token, userId, username) {
   })
 }
 
+function sendDenyContactToIndividual(token, userId) {
+  const data = {
+    "type": "denyContact",
+    userId
+  }
+
+  pushyAPI.sendPushNotification(data, token, {}, function (err, id) {
+    // Log errors to console
+    if (err) {
+      return console.log('Fatal Error', err);
+    }
+    // Log success
+    console.log('Push sent successfully! (ID: ' + id + ')')
+  })
+}
 
 module.exports = {
   sendMessageToIndividual,
   sendCreateRoomMessageToIndividual,
   sendNewContactToIndividual,
   sendDeleteContactToIndividual,
-  sendConfirmContactToIndividual
+  sendConfirmContactToIndividual,
+  sendDenyContactToIndividual
 };

@@ -275,12 +275,12 @@ router.get('/:memberId?', (request, response, next) => {
 router.delete('/:memberId?', (request, response, next) => {
     // Check for no parameter
     if (!request.params.memberId) {
-        response.status(400).send({
+        return response.status(400).send({
             message: "Missing required information"
         })
     // Check for bad parameter
     } else if (isNaN(request.params.memberId)) {
-        response.status(400).send({
+        return response.status(400).send({
             message: "Malformed parameter. memberId must be a number"
         })
     } else {
@@ -291,14 +291,14 @@ router.delete('/:memberId?', (request, response, next) => {
         pool.query(query, values)
             .then(result=> {
                 if (result.rowCount == 0) {
-                    response.status(400).send({
+                    return response.status(400).send({
                         message: "User not found"
                     })
                 } else {
                     next()
                 }
             }).catch(error => {
-                response.status(400).send({
+                return response.status(400).send({
                     message: "SQL Error on memberId check",
                     error: error
                 })
@@ -312,14 +312,14 @@ router.delete('/:memberId?', (request, response, next) => {
     pool.query(query, values)
         .then(result => {
             if (result.rowCount == 0) {
-                response.status(400).send({
+                return response.status(400).send({
                     message: "User is not a contact",
                 })
             } else {
                 next()
             }
         }).catch(error => {
-            response.status(400).send({
+            return response.status(400).send({
                 message: "SQL Error",
                 error: error
             })
@@ -332,7 +332,6 @@ router.delete('/:memberId?', (request, response, next) => {
     let values = [request.decoded.memberid, request.params.memberId]
     pool.query(insert, values)
         .then(result=> {
-            console.log(result);
             //send pushy notification to the user that was deleted
             let query = `SELECT token FROM Push_Token
             WHERE memberid=$1`;
@@ -349,10 +348,6 @@ router.delete('/:memberId?', (request, response, next) => {
                     message: "SQL Error on retrieving PUSHY token",
                     error: error
                 })  
-            })
-
-            response.send({
-                success: true
             })
         }).catch(err => {
             response.status(400).send({
