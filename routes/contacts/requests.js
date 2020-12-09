@@ -152,7 +152,7 @@ router.delete('/:memberId?', (request, response, next) => {
  *
  * @apiUse JSONError
  */
-router.get('/', (request, response, next) => {
+router.get('/', (request, response) => {
     
     // Get the user ID's of the members who have requested to be contacts and are not confirmed
     let query = `SELECT Username, MemberID from MEMBERS where MemberID in 
