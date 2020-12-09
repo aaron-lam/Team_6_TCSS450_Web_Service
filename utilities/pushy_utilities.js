@@ -50,10 +50,9 @@ function sendCreateRoomMessageToIndividual(token, roomName) {
   })
 }
 
-function sendNewContactToIndividual(token, userId, username) {
+function sendNewContactToIndividual(token, username) {
   const data = {
     "type": "newContact",
-    userId,
     username
   }
   // Send push notification via the Send Notifications API
@@ -68,7 +67,7 @@ function sendNewContactToIndividual(token, userId, username) {
   })
 }
 
-function sendDeleteContactToIndividual(token, userId, username) {
+function sendDeleteContactToIndividual(token, userId) {
   const data = {
     "type": "deleteContact",
     userId
@@ -84,10 +83,9 @@ function sendDeleteContactToIndividual(token, userId, username) {
   })
 }
 
-function sendConfirmContactToIndividual(token, userId, username) {
+function sendConfirmContactToIndividual(token, username) {
   const data = {
     "type": "confirmContact",
-    userId,
     username
   }
 

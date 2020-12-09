@@ -55,7 +55,7 @@ router.post('/:memberId', (request, response, next) => {
             values = [confirmedMemberId];
             pool.query(query, values)
             .then(result => {
-                pushyFunctions.sendConfirmContactToIndividual(result.rows[0].token, hostMemberId, hostUsername)
+                pushyFunctions.sendConfirmContactToIndividual(result.rows[0].token, hostUsername)
                 return response.status(200).send({
                     success: true
                 })
