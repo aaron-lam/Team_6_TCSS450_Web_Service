@@ -46,7 +46,7 @@ router.get('/', (request, response) => {
   const [email, theirPw] = credentials.split(':')
 
   if(email && theirPw) {
-    let theQuery = "SELECT Password, Salt, MemberId, Verification FROM Members WHERE Email=$1"
+    let theQuery = "SELECT Username, Password, Salt, MemberId, Verification FROM Members WHERE Email=$1"
     let values = [email]
     pool.query(theQuery, values)
       .then(result => {
@@ -56,6 +56,8 @@ router.get('/', (request, response) => {
           })
           return
         }
+
+        let username = result.rows[0].username;
         let salt = result.rows[0].salt
         //Retrieve our copy of the password
         let ourSaltedHash = result.rows[0].password
@@ -88,6 +90,7 @@ router.get('/', (request, response) => {
             response.json({
               success: true,
               message: 'Authentication successful!',
+              username: username,
               token: token
             })
           }
