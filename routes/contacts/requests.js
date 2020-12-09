@@ -155,46 +155,20 @@ router.delete('/:memberId?', (request, response, next) => {
 router.get('/', (request, response, next) => {
     
     // Get the user ID's of the members who have requested to be contacts and are not confirmed
-    let query = 'SELECT MemberID_A FROM CONTACTS WHERE MemberID_B=$1 and verified=0'
+    let query = `SELECT Username, MemberID from MEMBERS where MemberID in 
+                    (SELECT MemberID_A from Contacts where MemberID_B=$1 and Verified=0)`
     let values = [request.decoded.memberid]
 
     pool.query(query,values)
     .then(result => {
-        
-        if (result.rows.length == 0) {
-            response.status(400).send({
-                message: "No contact requests",
-            })
-        } else {
-            next()
-        }
-    })
-}, (request, response) => {
-
-    // build the query with all memberId's
-    // Also build the values array
-    let query = 'SELECT username, memberid FROM MEMBERS WHERE '
-    let values = [];
-    for (i = 0; i < result.rows.length; i++) {
-    
-        values[i] = result.rows[i].memberid_a
-        query += 'MEMBERID=$' + (i+1)
-    
-        // if it's not the last one, add syntax for another memberid
-        if (i+1 < result.rows.length) {
-            query += ' or '
-        }
-    }
-
-    pool.query(query,values)
-    .then(newResult => {
         response.send({
-            contactRequests: newResult.rows
-        }).catch(error => {
-            response.status(400).send({
-                message: "SQL Error",
-                error: error
-            })
+            contactRequests: result.rows
+        })
+    })
+    .catch(error => {
+        response.status(400).send({
+            message: "SQL Error",
+            error: error
         })
     })
 })
