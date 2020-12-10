@@ -10,10 +10,25 @@ const pushyFunctions = require('../../utilities/utils').messaging
 router.use(bodyParser.json())
 
 
-/** CONFIRM a request
- * 
- * Takes a memberId in the params
- * 
+/**
+ * @api {post} /contactRequests Confirm a request
+ * @apiName PostContactRequests
+ * @apiGroup ContactRequests
+ *
+ * @apiHeader {String} authorization Valid JSON Web Token JWT
+ * @apiParam {Number} memberId username the contact's user ID number
+ *
+ * @apiSuccess (Success 200) {boolean} success true when the request is confirmed
+ *
+ * @apiError (400: Missing Parameters) {String} message "POST Missing required information"
+ *
+ * @apiError (400: Malformed Parameters) {String} message "POST Malformed parameter. memberId must be a number"
+ *
+ * @apiError (400: Invalid request) {String} message "Contact request does not exist."
+ *
+ * @apiError (400: SQL Error) {String} message the reported SQL error details
+ *
+ * @apiUse JSONError
  */
 router.post('/:memberId', (request, response, next) => {
    // Check for no parameter
@@ -45,10 +60,10 @@ router.post('/:memberId', (request, response, next) => {
         query = 'SELECT USERNAME FROM MEMBERS WHERE MEMBERID=$1'
         values = [hostMemberId]
 
-        pool.query(query, values) 
+        pool.query(query, values)
         .then(result => {
             const hostUsername = result.rows[0].username
-            //send the person that was confirmed a push notification of the 
+            //send the person that was confirmed a push notification of the
             //new contact
             query = `SELECT token FROM Push_Token
             WHERE memberid=$1`;
@@ -64,14 +79,14 @@ router.post('/:memberId', (request, response, next) => {
                 return response.status(400).send({
                     message: "SQL Error on retrieving PUSHY token",
                     error: error
-                })  
+                })
             })
         })
         .catch(error => {
             return response.status(400).send({
                 message: "SQL Error on retrieving username",
                 error: error
-            })  
+            })
         })
       }).catch(error => {
          response.status(400).send({
@@ -82,10 +97,25 @@ router.post('/:memberId', (request, response, next) => {
    }
 })
 
-/** DENY a request
- * 
- * Takes a memberId in the body
- * 
+/**
+ * @api {delete} /contactRequests Deny a request
+ * @apiName DeleteContactRequests
+ * @apiGroup ContactRequests
+ *
+ * @apiHeader {String} authorization Valid JSON Web Token JWT
+ * @apiParam {Number} memberId username the contact's user ID number
+ *
+ * @apiSuccess (Success 200) {boolean} success true when the request is denied
+ *
+ * @apiError (400: Missing Parameters) {String} message "DELETE Missing required information"
+ *
+ * @apiError (400: Malformed Parameters) {String} message "DELETE Malformed parameter. memberId must be a number"
+ *
+ * @apiError (400: Invalid request) {String} message "Contact request does not exist."
+ *
+ * @apiError (400: SQL Error) {String} message the reported SQL error details
+ *
+ * @apiUse JSONError
  */
 router.delete('/:memberId?', (request, response, next) => {
    // Check for no parameter
@@ -102,7 +132,7 @@ router.delete('/:memberId?', (request, response, next) => {
       let deniedMemberId = request.params.memberId
       let hostMemberId = request.decoded.memberid
 
-      let query = 'DELETE FROM CONTACTS WHERE MEMBERID_A=$1 AND MEMBERID_B=$2' + 
+      let query = 'DELETE FROM CONTACTS WHERE MEMBERID_A=$1 AND MEMBERID_B=$2' +
                      'AND VERIFIED=0 RETURNING *'
       let values = [deniedMemberId,hostMemberId]
 
@@ -112,7 +142,7 @@ router.delete('/:memberId?', (request, response, next) => {
         if(result.rows.length == 0) {
             return response.status(400).send({
                 message: "Contact Request does not exist",
-            })           
+            })
         }
 
         //send the person that was denied a push notification
@@ -138,7 +168,7 @@ router.delete('/:memberId?', (request, response, next) => {
 /**
  * @api {get} /contacts/requests Get a list of contact requests
  * @apiName GetContactRequests
- * @apiGroup Contacts
+ * @apiGroup ContactRequests
  *
  * @apiHeader {String} authorization Valid JSON Web Token JWT
  *
@@ -153,7 +183,7 @@ router.delete('/:memberId?', (request, response, next) => {
  * @apiUse JSONError
  */
 router.get('/', (request, response) => {
-    
+
     // Get the user ID's of the members who have requested to be contacts and are not confirmed
     let query = `SELECT Username, MemberID from MEMBERS where MemberID in 
                     (SELECT MemberID_A from Contacts where MemberID_B=$1 and Verified=0)`

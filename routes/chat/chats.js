@@ -25,16 +25,12 @@ const msg_functions = require('../../utilities/utils').messaging;
  * @apiParam {String} name the name for the chat
  * @apiParam {Object[]} memberIds lists of member ids
  *
- * @apiSuccess (Success 201) {boolean} success true when the name is inserted
+ * @apiSuccess (Success 201) {boolean} success true when the chat is created
  * @apiSuccess (Success 201) {Number} chatId the generated chatId
  *
- * @apiError (400: Unknown user) {String} message "unknown email address"
- *
  * @apiError (400: Missing Parameters) {String} message "Missing required information"
- *
- * @apiError (400: SQL Error) {String} message the reported SQL error details
- *
- * @apiError (400: Unknow Chat ID) {String} message "invalid chat id"
+ * @apiError (400: SQL Error) {String} message "SQL Error"
+ * @apiError (400: SQL Error) {Object} error the reported SQL error details
  *
  * @apiUse JSONError
  */
@@ -113,9 +109,11 @@ function addUserToChatRoom(chatRoomId, userId) {
  * @apiError (404: Email Not Found) {String} message "email not found"
  * @apiError (400: Invalid Parameter) {String} message "Malformed parameter. chatId must be a number"
  * @apiError (400: Duplicate Email) {String} message "user already joined"
+ * @apiError (400: Some contacts already joined) {String} message
+ * "Some of the selected contacts already joined the room. Please only select contacts that have not joined the chat yet."
  * @apiError (400: Missing Parameters) {String} message "Missing required information"
- *
- * @apiError (400: SQL Error) {String} message the reported SQL error details
+ * @apiError (400: SQL Error) {String} message "SQL Error"
+ * @apiError (400: SQL Error) {Object} error the reported SQL error details
  *
  * @apiUse JSONError
  */
@@ -231,7 +229,7 @@ router.put("/:chatId/", (request, response, next) => {
 
 /**
  * @api {get} /chats/:chatId? Request to get the emails of user in a chat
- * @apiName GetChats
+ * @apiName GetChatEmails
  * @apiGroup Chats
  *
  * @apiHeader {String} authorization Valid JSON Web Token JWT
@@ -245,8 +243,8 @@ router.put("/:chatId/", (request, response, next) => {
  * @apiError (404: ChatId Not Found) {String} message "Chat ID Not Found"
  * @apiError (400: Invalid Parameter) {String} message "Malformed parameter. chatId must be a number"
  * @apiError (400: Missing Parameters) {String} message "Missing required information"
- *
- * @apiError (400: SQL Error) {String} message the reported SQL error details
+ * @apiError (400: SQL Error) {String} message "SQL Error"
+ * @apiError (400: SQL Error) {Object} error the reported SQL error details
  *
  * @apiUse JSONError
  */
@@ -306,7 +304,7 @@ router.get("/:chatId", (request, response, next) => {
 
 /**
  * @api {get} /chats/email/:email? Request to get the chat room ids of user email in a chat
- * @apiName GetChats
+ * @apiName GetChatRoomIds
  * @apiGroup Chats
  *
  * @apiHeader {String} authorization Valid JSON Web Token JWT
@@ -320,8 +318,8 @@ router.get("/:chatId", (request, response, next) => {
  * @apiError (404: ChatId Not Found) {String} message "Chat ID Not Found"
  * @apiError (400: Invalid Parameter) {String} message "Malformed parameter. chatId must be a number"
  * @apiError (400: Missing Parameters) {String} message "Missing required information"
- *
- * @apiError (400: SQL Error) {String} message the reported SQL error details
+ * @apiError (400: SQL Error) {String} message "SQL Error"
+ * @apiError (400: SQL Error) {Object} error the reported SQL error details
  *
  * @apiUse JSONError
  */
@@ -385,8 +383,8 @@ router.get("/email/:email", (request, response, next) => {
  * @apiError (400: Invalid Parameter) {String} message "Malformed parameter. chatId must be a number"
  * @apiError (400: Duplicate Email) {String} message "user not in chat"
  * @apiError (400: Missing Parameters) {String} message "Missing required information"
- *
- * @apiError (400: SQL Error) {String} message the reported SQL error details
+ * @apiError (400: SQL Error) {String} message "SQL Error"
+ * @apiError (400: SQL Error) {Object} error the reported SQL error details
  *
  * @apiUse JSONError
  */
