@@ -16,26 +16,29 @@ let validZipcode = require('../utilities/weather_utils').validZipcode
 /**
  * @apiDefine JSONError
  * @apiError (400: JSON Error) {String} message "malformed JSON in parameters"
- */ 
+ */
 
 /**
  * @api {Get} /weather/location Request weather data based on a lat/long
  * @apiName GetWeather
  * @apiGroup Weather
- * 
- * @apiHeader {Number} Latitude
- * @apiHeader {Number} Longitude
- * 
+ *
+ * @apiHeader {Number} lat Latitude
+ * @apiHeader {Number} long Longitude
+ * @apiHeader {Number} zipcode zip code
+ *
  * @apiSuccess (Success 200) {JSON} weather object containing data for the week
- * 
+ *
  * @apiError (400: Missing Parameters) {String} message "Missing required information"
- * 
+ *
  * @apiError (400: Weather API Error) {String} message "Axios Error Message"
  *
  * @apiError (400: Malformed lat/long) {String} message "Location not found"
- * 
+ *
+ * @apiError (400: Invalid Zip Code) {String} message "Invalid Zip Code"
+ *
  * @apiUse JSONError
- */ 
+ */
 router.get('/location', (req, res) => {
 
     let lat = req.headers.lat
@@ -56,9 +59,9 @@ router.get('/location', (req, res) => {
         } else {
             return res.status(400).send({
                 message: "Invalid Zip Code"
-            })    
+            })
         }
-    }   
+    }
 
     if (lat && long) {
         const cityData = cities.gpsLookup(lat, long);
@@ -86,7 +89,7 @@ router.get('/location', (req, res) => {
             res.status(400).send({
                 message: error
             })
-        }) 
+        })
     } else {
         res.status(400).send({
             message: "Missing required information"

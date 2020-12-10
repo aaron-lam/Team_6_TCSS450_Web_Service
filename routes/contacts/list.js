@@ -8,7 +8,28 @@ const pushyFunctions = require('../../utilities/utils').messaging
 
 router.use(bodyParser.json())
 
-// Add a new contact
+/**
+ * @api {post} /contacts Request to add a contact to the user's contact list
+ * @apiName PostContacts
+ * @apiGroup Contacts
+ *
+ * @apiHeader {String} authorization Valid JSON Web Token JWT
+ * @apiParam {Number} memberId username the contact's user ID number.
+ *
+ * @apiSuccess (Success 200) {boolean} success true when the contact is added
+ *
+ * @apiError (400: Missing Parameters) {String} message "Missing required information"
+ *
+ * @apiError (400: Invalid user) {String} message "User does not exist."
+ *
+ * @apiError (400: Add themselves as contact) {String} message "User is attempting to add themself."
+ *
+ * @apiError (400: Is contact already) {String} message "You are already contacts with this person."
+ *
+ * @apiError (400: SQL Error) {String} message the reported SQL error details
+ *
+ * @apiUse JSONError
+ */
 router.post('/', (request, response, next) => {
 
     // These will hold the memberId's of the two members involved
@@ -33,7 +54,7 @@ router.post('/', (request, response, next) => {
 
     pool.query(query,values)
     .then(result => {
-        
+
         // If there are no results, the username doesn't exist in the system.
         if (result.rows.length == 0) {
             response.status(400).send({
@@ -68,7 +89,7 @@ router.post('/', (request, response, next) => {
 
     // Second query
     pool.query(query,values)
-    .then(result => { 
+    .then(result => {
         // If you get any rows in response, they're already contacts. Send an error.
         if (result.rows.length > 0) {
             response.status(400).send({
@@ -92,7 +113,7 @@ router.post('/', (request, response, next) => {
 
     // Third query
     pool.query(query,values)
-    .then(result => { 
+    .then(result => {
 
         // This means either they've already sent a request, or they have a request
         // they haven't responded to from the person they're trying to add
@@ -110,7 +131,7 @@ router.post('/', (request, response, next) => {
             }
         } else {
             next()
-        }        
+        }
     }).catch(error => {
         response.status(400).send({
           message: "SQL Error",
@@ -133,16 +154,16 @@ router.post('/', (request, response, next) => {
         query = 'SELECT USERNAME FROM MEMBERS WHERE MEMBERID=$1'
         values = [response.locals.userThatsAdding]
 
-        pool.query(query, values) 
+        pool.query(query, values)
         .then(result => {
             const userAddingUsername = result.rows[0].username
-            //send the person being added a push notification 
+            //send the person being added a push notification
             //of the contact request
             query = `SELECT token FROM Push_Token WHERE MemberID=$1`;
             values = [response.locals.userToAdd];
             pool.query(query, values)
             .then(result => {
-                pushyFunctions.sendNewContactToIndividual(result.rows[0].token, 
+                pushyFunctions.sendNewContactToIndividual(result.rows[0].token,
                     userAddingUsername)
                 return response.status(200).send({
                     success: true
@@ -152,7 +173,7 @@ router.post('/', (request, response, next) => {
                 return response.status(400).send({
                     message: "SQL Error on retrieving PUSHY token",
                     error: error
-                })  
+                })
             })
         })
 
@@ -194,7 +215,7 @@ router.post('/', (request, response, next) => {
 router.get('/:memberId?', (request, response, next) => {
     // Empty parameter operation
     if (!request.params.memberId) {
-        let query = 
+        let query =
         `SELECT FirstName, LastName, Username, MemberId 
         FROM Members 
         WHERE MemberID 
@@ -373,7 +394,7 @@ router.delete('/:memberId', (request, response, next) => {
                 return response.status(400).send({
                     message: "SQL Error on retrieving PUSHY token",
                     error: error
-                })  
+                })
             })
         }).catch(err => {
             response.status(400).send({
