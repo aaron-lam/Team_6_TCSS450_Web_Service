@@ -56,7 +56,7 @@ app.use("/contactRequests", middleware.checkToken, require("./routes/contacts/re
 /**
  * Route for users to get weather information
  */
-app.use("/weather", require("./routes/weather"));
+app.use("/weather", middleware.checkToken, require("./routes/weather"));
 
 /**
  * Route for users to create / get messages in chat room

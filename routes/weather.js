@@ -4,6 +4,9 @@ const express = require('express')
 const router = express.Router()
 router.use(express.json())
 
+const pool = require('../utilities/utils').pool
+const bodyParser = require("body-parser")
+
 const axios = require('axios')
 const zipcodes = require('zipcodes')
 const cities = require('cities')
@@ -96,5 +99,57 @@ router.get('/location', (req, res) => {
         })
     }
 });
+
+
+router.get("/favorite", (request, response) => {
+
+    const userId = request.decoded.memberid
+    const query = 'SELECT CityName, StateName, Lat, Long FROM LOCATIONS WHERE MemberID=$1'
+    const values = [userId]
+
+    pool.query(query, values)
+    .then(result => {
+        response.send({
+            favorites: result.rows
+        })
+    })
+    .catch(error => {
+        response.status(400).send({
+            message: "SQL Error",
+            error: error 
+        })
+    })
+
+})
+
+router.post("/favorite", (request, response) => {
+
+    const userId = request.decoded.memberid
+    const city = request.body.city
+    const state = request.body.state
+    const lat = request.body.lat
+    const long = request.body.long
+
+    if(lat && long && city && state) {
+        const query = 'INSERT INTO LOCATIONS(MemberID, CityName, StateName, Lat, Long) VALUES($1, $2, $3, $4, $5)'
+        const values = [userId, city, state, lat, long]
+        pool.query(query, values)
+        .then(result => {
+            response.send({
+                success: true
+            })
+        })
+        .catch(error => {
+            response.status(400).send({
+                message: "SQL Error",
+                error: error 
+            })
+        })
+    } else {
+        response.status(400).send({
+            message: "Missing required information"
+        })
+    }
+})
 
 module.exports = router
