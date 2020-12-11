@@ -44,10 +44,10 @@ CREATE TABLE Messages (PrimaryKey SERIAL PRIMARY KEY,
 DROP TABLE IF EXISTS Locations;
 CREATE TABLE Locations (PrimaryKey SERIAL PRIMARY KEY,
                         MemberID INT,
-                        Nickname VARCHAR(255),
+                        CityName VARCHAR(255),
+                        StateName VARCHAR(255), 
                         Lat DECIMAL,
                         Long DECIMAL,
-                        ZIP INT,
                         FOREIGN KEY(MemberID) REFERENCES Members(MemberID)
 );
 
