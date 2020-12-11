@@ -166,6 +166,7 @@ router.post('/', (request, response, next) => {
                 pushyFunctions.sendNewContactToIndividual(result.rows[0].token,
                     userAddingUsername)
                 return response.status(200).send({
+                    type: "addContact",
                     success: true
                 })
             })
@@ -281,6 +282,7 @@ router.get('/:username?', (request, response, next) => {
             }
         } else {
             response.send({
+                type: "checkContact",
                 result: true
             })
         }
