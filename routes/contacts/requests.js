@@ -9,23 +9,19 @@ const pushyFunctions = require('../../utilities/utils').messaging
 
 router.use(bodyParser.json())
 
-
 /**
- * @api {post} /contactRequests Confirm a request
- * @apiName PostContactRequests
+ * @api {post} /contactRequests/:memberId Request to add a new contact
+ * @apiName ConfirmContactRequest
  * @apiGroup ContactRequests
  *
  * @apiHeader {String} authorization Valid JSON Web Token JWT
- * @apiParam {Number} memberId username the contact's user ID number
+ * @apiParam {String} memberId the memberId of the user you are confirming as a contact
  *
- * @apiSuccess (Success 200) {boolean} success true when the request is confirmed
+ * @apiSuccess {boolean} success true or false based on whether they were successfully added or not
  *
- * @apiError (400: Missing Parameters) {String} message "POST Missing required information"
- *
- * @apiError (400: Malformed Parameters) {String} message "POST Malformed parameter. memberId must be a number"
- *
- * @apiError (400: Invalid request) {String} message "Contact request does not exist."
- *
+ * @apiError (400: Missing Info) {String} message "Missing required information"
+ * @apiError (400: Not a Number) {String} message "Malformed parameter. memberId must be a number"
+ * @apiError (400: Invalid Contact Request) {String} message "Contact request does not exist."
  * @apiError (400: SQL Error) {String} message the reported SQL error details
  *
  * @apiUse JSONError
@@ -34,12 +30,12 @@ router.post('/:memberId', (request, response, next) => {
    // Check for no parameter
    if (!request.params.memberId) {
       response.status(400).send({
-          message: "POST Missing required information"
+          message: "Missing required information"
       })
   // Check for bad parameter
   } else if (isNaN(request.params.memberId)) {
       response.status(400).send({
-          message: "POST Malformed parameter. memberId must be a number"
+          message: "Malformed parameter. memberId must be a number"
       })
   } else {
       let confirmedMemberId = request.params.memberId
@@ -126,7 +122,7 @@ router.delete('/:memberId?', (request, response, next) => {
   // Check for bad parameter
   } else if (isNaN(request.params.memberId)) {
       response.status(400).send({
-          message: "DELETE Malformed parameter. memberId must be a number"
+          message: "Malformed parameter. memberId must be a number"
       })
   } else {
       let deniedMemberId = request.params.memberId

@@ -191,12 +191,11 @@ router.post('/', (request, response, next) => {
  * @apiGroup Contacts
  *
  * @apiHeader {String} authorization Valid JSON Web Token JWT
- * @apiParam {Number} memberId (Optional) the contact's user ID number.  If no number provided, all are contacts returned
+ * @apiParam {String} username (Optional) The username of a user that the user wants to potentially add as a contact
  *
  * @apiSuccess {Object[]} contacts List of confirmed contacts associated with the requester
- * @apiSuccess {String} first requested contact's first name
- * @apiSuccess {String} last requested contact's last name
- * @apiSuccess {String} username requested contact's username
+ * 
+ * @apiSuccess {boolean} Sends "true" if the contact could potentially be added if the user wishes
  *
  * @apiError (400: Invalid user) {String} message "User not found"
  *
@@ -212,10 +211,10 @@ router.post('/', (request, response, next) => {
  *
  * @apiUse JSONError
  */
-router.get('/:memberId?', (request, response, next) => {
+router.get('/:username?', (request, response, next) => {
     // Empty parameter operation
-    if (!request.params.memberId) {
-        let query =
+    if (!request.params.username) {
+        let query = 
         `SELECT FirstName, LastName, Username, MemberId 
         FROM Members 
         WHERE MemberID 
@@ -242,57 +241,52 @@ router.get('/:memberId?', (request, response, next) => {
                 error: error
             })
         })
-
-    // Checking for bad parameter
-    } else if (isNaN(request.params.memberId)) {
-        response.status(400).send({
-            message: "LISTGET Malformed parameter. memberId must be a number"
-        })
     } else {
         next()
     }
 }, (request, response, next) => {
-    // Check if contact exists, and confirmation status
-    let query = 'SELECT * FROM CONTACTS WHERE (MemberID_A=$1 AND MemberID_B=$2 AND VERIFIED=1) OR (MemberID_A=$2 AND MemberID_B=$1 AND VERIFIED=1)'
-    let values = [request.decoded.memberid, request.params.memberId]
+
+    // Convert the username to a memberId so you can check it's status in the contacts table
+    let query = "SELECT MEMBERID FROM MEMBERS WHERE USERNAME=$1"
+    let values = [request.params.username]
 
     pool.query(query, values)
-        .then(result => {
-            if (result.rowCount == 0) {
-                response.status(400).send({
-                    message: "User is not a contact",
-                })
-            } else {
-                next()
-            }
-        }).catch(error => {
-            response.status(400).send({
-                message: "SQL Error",
-                error: error
-            })
-        })
-}, (request, response) => {
-    // Verify requested user exists, if so return request
-    let query = 'SELECT * FROM MEMBERS WHERE MemberID=$1'
-    let values = [request.params.memberId]
-
-    pool.query(query, values)
-    .then(result=> {
+    .then(result => {
         if (result.rowCount == 0) {
             response.status(400).send({
-                message: "User not found"
+                message: "Username not found"
             })
         } else {
+            response.locals.memberid = result.rows[0].memberid
+            next()
+        }
+    })
+}, (request, response) => {
+
+    // Check if you're already contacts or have an open contact request. If you are, throw error, if not then send a success result
+    let query = 'SELECT * FROM CONTACTS WHERE (MemberID_A=$1 AND MemberID_B=$2) OR (MemberID_A=$2 AND MemberID_B=$1)'
+    let values = [request.decoded.memberid, response.locals.memberid]
+
+    pool.query(query, values)
+    .then(result => {
+        if (result.rowCount != 0) {
+            if (result.rows[0].verified == 1) {
+                response.status(400).send({
+                    message: "User is already a contact",
+                })
+            } else {
+                response.status(400).send({
+                    message: "There is already an open contact request with this person",
+                })
+            }
+        } else {
             response.send({
-                first: result.rows[0].firstname,
-                last: result.rows[0].lastname,
-                username: result.rows[0].username,
-                memberId: result.rows[0].memberid
+                result: true
             })
         }
     }).catch(error => {
         response.status(400).send({
-            message: "SQL Error on user check",
+            message: "SQL Error",
             error: error
         })
     })
