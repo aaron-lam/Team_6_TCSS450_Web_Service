@@ -262,13 +262,10 @@ router.get("/:chatId?/:messageId?", (request, response, next) => {
  * @returns room name
  */
 function getRoomName(chatId) {
-  let query = `SELECT Chats.Name AS roomName
-                    FROM Messages
-                    INNER JOIN Chats ON Messages.ChatId=Chats.ChatId
-                    WHERE Messages.ChatId=$1`;
+  let query = `SELECT Name FROM Chats WHERE ChatId=$1`;
   let values = [chatId];
   return pool.query(query, values)
-    .then(result => result.rows[0].roomname)
+    .then(result => result.rows[0].name)
     .catch(err => {
       throw err;
     });
