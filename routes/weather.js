@@ -81,6 +81,8 @@ router.get('/location', (req, res) => {
                 temperatures.push(parseWeather(weatherData.daily[i]))
             }
             res.json({
+                lat: lat,
+                long: long,
                 city: cityData.city,
                 state: cityData.state_abbr,
                 forecast: forecast,
@@ -102,7 +104,6 @@ router.get('/location', (req, res) => {
 
 
 router.get("/favorite", (request, response) => {
-
     const userId = request.decoded.memberid
     const query = 'SELECT CityName, StateName, Lat, Long FROM LOCATIONS WHERE MemberID=$1'
     const values = [userId]
@@ -119,7 +120,6 @@ router.get("/favorite", (request, response) => {
             error: error 
         })
     })
-
 })
 
 router.post("/favorite", (request, response) => {
@@ -132,6 +132,37 @@ router.post("/favorite", (request, response) => {
 
     if(lat && long && city && state) {
         const query = 'INSERT INTO LOCATIONS(MemberID, CityName, StateName, Lat, Long) VALUES($1, $2, $3, $4, $5)'
+        const values = [userId, city, state, lat, long]
+        pool.query(query, values)
+        .then(result => {
+            response.send({
+                success: true
+            })
+        })
+        .catch(error => {
+            response.status(400).send({
+                message: "SQL Error",
+                error: error 
+            })
+        })
+    } else {
+        response.status(400).send({
+            message: "Missing required information"
+        })
+    }
+})
+
+router.delete("/favorite", (request, response) => {
+    const userId = request.decoded.memberid
+    const city = request.body.city
+    const state = request.body.state
+    const lat = request.body.lat
+    const long = request.body.long
+
+    
+    if(lat && long && city && state) {
+        const query = `DELETE FROM LOCATIONS WHERE MemberID=$1 AND CityName=$2 AND StateName=$3
+                            AND Lat=$4 AND Long=$5`
         const values = [userId, city, state, lat, long]
         pool.query(query, values)
         .then(result => {
