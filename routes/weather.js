@@ -102,7 +102,17 @@ router.get('/location', (req, res) => {
     }
 });
 
-
+/**
+ * @api {Get} /weather/favorite Request a user's favorite weather locations
+ * @apiName GetFavoriteWeather
+ * @apiGroup Weather
+ *
+ * @apiSuccess (Success 200) {JSON} JSON object with scucess messages
+ *
+ * @apiError (400: Missing Parameters) {String} message "Missing required information"
+ *
+ * @apiUse JSONError
+ */
 router.get("/favorite", (request, response) => {
     const userId = request.decoded.memberid
     const query = 'SELECT CityName, StateName, Lat, Long FROM LOCATIONS WHERE MemberID=$1'
