@@ -163,11 +163,10 @@ router.post("/favorite", (request, response) => {
 
 router.delete("/favorite", (request, response) => {
     const userId = request.decoded.memberid
-    const city = request.body.city
-    const state = request.body.state
-    const lat = request.body.lat
-    const long = request.body.long
-    console.log(city, state, lat, long);
+    const city = request.headers.city
+    const state = request.headers.state
+    const lat = request.headers.lat
+    const long = request.headers.long
     
     if(lat && long && city && state) {
         const query = `DELETE FROM LOCATIONS WHERE MemberID=$1 AND CityName=$2 AND StateName=$3
@@ -186,7 +185,6 @@ router.delete("/favorite", (request, response) => {
             })
         })
     } else {
-        console.log("Missing parameters on DELETE favorite")
         response.status(400).send({
             message: "Missing required information"
         })
