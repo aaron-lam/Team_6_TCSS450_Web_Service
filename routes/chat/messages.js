@@ -128,9 +128,9 @@ router.post("/", (request, response, next) => {
                         WHERE ChatMembers.chatId=$1`;
   let values = [request.body.chatId];
   pool.query(query, values)
-    .then(result => {
-      console.log(request.decoded.email);
-      console.log(request.body.message);
+    .then(async result => {
+      response.message.username = await getUserName(response.message.email);
+      console.log(response.message);
       result.rows.forEach(entry =>
         msg_functions.sendMessageToIndividual(
           entry.token,
@@ -139,13 +139,27 @@ router.post("/", (request, response, next) => {
         success: true
       })
     }).catch(err => {
-
     response.status(400).send({
       message: "SQL Error on select from push token",
       error: err
     })
   })
 });
+
+/**
+ * Get username with user email
+ * @param email user email
+ * @returns username
+ */
+function getUserName(email) {
+  let query = `SELECT username FROM Members WHERE email=$1`;
+  let values = [email];
+  return pool.query(query, values)
+    .then(result => result.rows[0].username)
+    .catch(err => {
+      throw err;
+    })
+}
 
 /**
  * @api {get} /messages/:chatId?/:messageId? Request to get chat messages
@@ -208,7 +222,7 @@ router.get("/:chatId?/:messageId?", (request, response, next) => {
       error: error
     })
   })
-}, (request, response) => {
+}, async (request, response) => {
   //perform the Select
 
   if (!request.params.messageId) {
@@ -217,7 +231,7 @@ router.get("/:chatId?/:messageId?", (request, response, next) => {
     request.params.messageId = 2 ** 31 - 1
   }
 
-  let query = `SELECT Messages.PrimaryKey AS messageId, Members.Email, Messages.Message, 
+  let query = `SELECT Messages.PrimaryKey AS messageId, Members.Email, Messages.Message,
                     to_char(Messages.Timestamp AT TIME ZONE 'PDT', 'YYYY-MM-DD HH24:MI:SS.US' ) AS Timestamp
                     FROM Messages
                     INNER JOIN Members ON Messages.MemberId=Members.MemberId
@@ -226,18 +240,38 @@ router.get("/:chatId?/:messageId?", (request, response, next) => {
                     LIMIT 15`
   let values = [request.params.chatId, request.params.messageId];
   pool.query(query, values)
-    .then(result => {
+    .then(async result => {
+      const roomName = await getRoomName(request.params.chatId);
       response.send({
         chatId: request.params.chatId,
+        roomName,
         rowCount: result.rowCount,
         rows: result.rows
       })
     }).catch(err => {
-    response.status(400).send({
-      message: "SQL Error",
-      error: err
-    })
+      response.status(400).send({
+        message: "SQL Error",
+        error: err
+      })
   })
 });
+
+/**
+ * Get room name with chat room id
+ * @param chatId chat room id
+ * @returns room name
+ */
+function getRoomName(chatId) {
+  let query = `SELECT Chats.Name AS roomName
+                    FROM Messages
+                    INNER JOIN Chats ON Messages.ChatId=Chats.ChatId
+                    WHERE Messages.ChatId=$1`;
+  let values = [chatId];
+  return pool.query(query, values)
+    .then(result => result.rows[0].roomname)
+    .catch(err => {
+      throw err;
+    });
+}
 
 module.exports = router;
