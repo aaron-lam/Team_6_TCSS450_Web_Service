@@ -151,7 +151,7 @@ router.post('/', (request, response, next) => {
     .then(result => {
 
         //get the username of the person that's creating the contact request
-        query = 'SELECT USERNAME FROM MEMBERS WHERE MEMBERID=$1'
+        query = 'SELECT Username, MemberID FROM MEMBERS WHERE MemberID=$1'
         values = [response.locals.userThatsAdding]
 
         pool.query(query, values)
@@ -164,7 +164,7 @@ router.post('/', (request, response, next) => {
             pool.query(query, values)
             .then(result => {
                 pushyFunctions.sendNewContactToIndividual(result.rows[0].token,
-                    userAddingUsername)
+                    userAddingUsername, response.locals.userThatsAdding)
                 return response.status(200).send({
                     type: "addContact",
                     success: true
