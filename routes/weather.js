@@ -22,7 +22,7 @@ let validZipcode = require('../utilities/weather_utils').validZipcode
  */
 
 /**
- * @api {Get} /weather/location Request weather data based on a lat/long
+ * @api {Get} /weather/location Request weather data based on a lat/long or zipcode
  * @apiName GetWeather
  * @apiGroup Weather
  *
@@ -106,7 +106,7 @@ router.get('/location', (req, res) => {
  * @apiName GetFavoriteWeather
  * @apiGroup Weather
  *
- * @apiSuccess (Success 200) {JSON} JSON object with scucess messages
+ * @apiSuccess (Success 200) {Boolean} success "true"
  *
  * @apiError (400: Missing Parameters) {String} message "Missing required information"
  *
@@ -131,6 +131,24 @@ router.get("/favorite", (request, response) => {
     })
 })
 
+
+/**
+ * @api {POST} /weather/favorite Add a new location to a user's favorite weather locations
+ * @apiName PostFavoriteWeather
+ * @apiGroup Weather
+ *
+ * @apiParam {String} City Name
+ * @apiParam {String} State Name
+ * @apiParam {Number} Latitude
+ * @apiParam {Number} Longitude 
+ * 
+ * @apiSuccess (Success 200) {Boolean} success "true"
+ *
+ * @apiError (400: SQL Error) {String} message "SQL Error"
+ * @apiError (400: Missing Parameters) {String} message "Missing required information"
+ *
+ * @apiUse JSONError
+ */
 router.post("/favorite", (request, response) => {
 
     const userId = request.decoded.memberid
@@ -161,6 +179,23 @@ router.post("/favorite", (request, response) => {
     }
 })
 
+/**
+ * @api {DELETE} /weather/favorite Add a new location to a user's favorite weather locations
+ * @apiName PostFavoriteWeather
+ * @apiGroup Weather
+ *
+ * @apiHeader {String} City Name
+ * @apiHeader {String} State Name
+ * @apiHeader {Number} Latitude
+ * @apiHeader {Number} Longitude 
+ * 
+ * @apiSuccess (Success 200) {Boolean} success "true"
+ *
+ * @apiError (400: SQL Error) {String} message "SQL Error"
+ * @apiError (400: Missing Parameters) {String} message "Missing required information"
+ *
+ * @apiUse JSONError
+ */
 router.delete("/favorite", (request, response) => {
     const userId = request.decoded.memberid
     const city = request.headers.city
