@@ -17,7 +17,7 @@ function validateEmail(email) {
         return 'Email cannot contain emojis'
     }
 
-    illegalChars = ['+', '"', ",", " "]
+    illegalChars = ['"', ",", " "]
     
     illegalChars.forEach(char => {
         if(local.includes(char)) return `${char} cannot be present before @`
