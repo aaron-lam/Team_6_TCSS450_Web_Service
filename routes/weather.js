@@ -5,7 +5,6 @@ const router = express.Router()
 router.use(express.json())
 
 const pool = require('../utilities/utils').pool
-const bodyParser = require("body-parser")
 
 const axios = require('axios')
 const zipcodes = require('zipcodes')
@@ -26,12 +25,18 @@ let validZipcode = require('../utilities/weather_utils').validZipcode
  * @apiName GetWeather
  * @apiGroup Weather
  *
+ * @apiHeader {String} Authorization valid JSON Web Token JWT
  * @apiHeader {Number} lat Latitude
  * @apiHeader {Number} long Longitude
  * @apiHeader {Number} zipcode zip code
  *
- * @apiSuccess (Success 200) {JSON} weather object containing data for the week
- *
+ * @apiSuccess (Success 200) {Number} latitude Latitude of the Weather Data
+ * @apiSuccess (Success 200) {Number} longitude Longitude of the Weather Data
+ * @apiSuccess (Success 200) {String} city City of the Weather Data
+ * @apiSuccess (Success 200) {String} state State of the Weather Data
+ * @apiSuccess (Success 200) {JSON[]} forecast JSON array containing hourly data for 48-hours
+ * @apiSuccess (Success 200) {JSON[]} daily JSON array containing daily weather forecast a week
+ * 
  * @apiError (400: Missing Parameters) {String} message "Missing required information"
  *
  * @apiError (400: Weather API Error) {String} message "Axios Error Message"
@@ -103,10 +108,11 @@ router.get('/location', (req, res) => {
 
 /**
  * @api {Get} /weather/favorite Request a user's favorite weather locations
- * @apiName GetFavoriteWeather
- * @apiGroup Weather
+ * @apiName GetFavoriteLocation
+ * @apiGroup Favorite Location
  *
- * @apiSuccess (Success 200) {Boolean} success "true"
+ * @apiHeader {String} Authorization valid JSON Web Token JWT
+ * @apiSuccess (Success 200) {JSON[]} favorites JSON array containing the user's favorite locations 
  *
  * @apiError (400: Missing Parameters) {String} message "Missing required information"
  *
@@ -134,15 +140,16 @@ router.get("/favorite", (request, response) => {
 
 /**
  * @api {POST} /weather/favorite Add a new location to a user's favorite weather locations
- * @apiName PostFavoriteWeather
- * @apiGroup Weather
+ * @apiName PostFavoriteLocation
+ * @apiGroup Favorite Location
  *
- * @apiParam {String} City Name
- * @apiParam {String} State Name
- * @apiParam {Number} Latitude
- * @apiParam {Number} Longitude 
+ * @apiHeader {String} Authorization valid JSON Web Token JWT
+ * @apiParam {String} City City of the location to delete
+ * @apiParam {String} City State of the location to delete
+ * @apiParam {Number} Longitude Latitude of location to delete 
+ * @apiParam {Number} Longitude Longitude of location to delete  
  * 
- * @apiSuccess (Success 200) {Boolean} success "true"
+ * @apiSuccess (Success 200) {Boolean} success true When the location was successful inserted 
  *
  * @apiError (400: SQL Error) {String} message "SQL Error"
  * @apiError (400: Missing Parameters) {String} message "Missing required information"
@@ -180,16 +187,17 @@ router.post("/favorite", (request, response) => {
 })
 
 /**
- * @api {DELETE} /weather/favorite Add a new location to a user's favorite weather locations
- * @apiName PostFavoriteWeather
- * @apiGroup Weather
+ * @api {DELETE} /weather/favorite Delete a location from user's favorite weather locations
+ * @apiName DeleteFavoriteLocation
+ * @apiGroup Favorite Location
  *
- * @apiHeader {String} City Name
- * @apiHeader {String} State Name
- * @apiHeader {Number} Latitude
- * @apiHeader {Number} Longitude 
+ * @apiHeader {String} Authorization valid JSON Web Token JWT
+ * @apiHeader {String} City City of the location to delete
+ * @apiHeader {String} State State(Abbreviation) of the location to delete
+ * @apiHeader {Number} Latitude Latitude of location to delete
+ * @apiHeader {Number} Longitude Longitude of location to delete 
  * 
- * @apiSuccess (Success 200) {Boolean} success "true"
+ * @apiSuccess (Success 200) {Boolean} success true When the location was successfully deleted
  *
  * @apiError (400: SQL Error) {String} message "SQL Error"
  * @apiError (400: Missing Parameters) {String} message "Missing required information"
