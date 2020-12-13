@@ -3,8 +3,6 @@ const express = require('express')
 //Access the connection to Heroku Database
 let pool = require('../../utilities/utils').pool
 
-let getHash = require('../../utilities/utils').getHash
-
 const router = express.Router()
 
 router.use(express.json())

@@ -282,7 +282,7 @@ router.get("/:chatId", (request, response, next) => {
     })
   })
 }, (request, response) => {
-  //REtrive the members
+  //Retrieve the members
   let query = `SELECT Members.Email 
                     FROM ChatMembers
                     INNER JOIN Members ON ChatMembers.MemberId=Members.MemberId
@@ -371,7 +371,7 @@ router.get("/email/:email", (request, response, next) => {
  * @apiGroup Chats
  *
  * @apiDescription Does not delete the user associated with the required JWT but
- * instead delelets the user based on the email parameter.
+ * instead deletes the user based on the email parameter.
  *
  * @apiParam {Number} chatId the chat to delete the user from
  * @apiParam {String} email the email of the user to delete

@@ -69,9 +69,9 @@ router.put('/', middleware.checkToken, (request, response, next) => {
     })
   })
 }, (request, response) => {
-  //ON CONFLICT is a Postgressql syntax. it allows for an extra
+  //ON CONFLICT is a Postgres sql syntax. it allows for an extra
   //action when conflicts occur with inserts. This will update
-  //an exisiting users token.
+  //an existing users token.
   let insert = `INSERT INTO Push_Token(MemberId, Token)
                   VALUES ($1, $2)
                   ON CONFLICT (MemberId) DO UPDATE SET token=$2

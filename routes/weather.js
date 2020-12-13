@@ -33,11 +33,8 @@ let validZipcode = require('../utilities/weather_utils').validZipcode
  * @apiSuccess (Success 200) {JSON} weather object containing data for the week
  *
  * @apiError (400: Missing Parameters) {String} message "Missing required information"
- *
  * @apiError (400: Weather API Error) {String} message "Axios Error Message"
- *
  * @apiError (400: Malformed lat/long) {String} message "Location not found"
- *
  * @apiError (400: Invalid Zip Code) {String} message "Invalid Zip Code"
  *
  * @apiUse JSONError
@@ -106,9 +103,11 @@ router.get('/location', (req, res) => {
  * @apiName GetFavoriteWeather
  * @apiGroup Weather
  *
- * @apiSuccess (Success 200) {JSON} JSON object with scucess messages
+ * @apiHeader {String} authorization Valid JSON Web Token JWT
  *
- * @apiError (400: Missing Parameters) {String} message "Missing required information"
+ * @apiSuccess (Success 200) {JSON} JSON object with success messages
+ *
+ * @apiError (400: SQL Error) {String} message "SQL Error"
  *
  * @apiUse JSONError
  */
@@ -126,11 +125,30 @@ router.get("/favorite", (request, response) => {
     .catch(error => {
         response.status(400).send({
             message: "SQL Error",
-            error: error 
+            error: error
         })
     })
 })
 
+/**
+ * @api {Post} /weather/favorite Add a weather location into user favorites
+ * @apiName PostFavoriteWeather
+ * @apiGroup Weather
+ *
+ * @apiHeader {String} authorization Valid JSON Web Token JWT
+ *
+ * @apiParam {String} city favorite location's city
+ * @apiParam {String} state favorite location's state
+ * @apiParam {String} lat favorite location's latitude
+ * @apiParam {String} long favorite location's longitude
+ *
+ * @apiSuccess (Success 200) {JSON} JSON object with success messages
+ *
+ * @apiError (400: Missing Parameters) {String} message "Missing required information"
+ * @apiError (400: SQL Error) {String} message "SQL Error"
+ *
+ * @apiUse JSONError
+ */
 router.post("/favorite", (request, response) => {
 
     const userId = request.decoded.memberid
@@ -143,7 +161,7 @@ router.post("/favorite", (request, response) => {
         const query = 'INSERT INTO LOCATIONS(MemberID, CityName, StateName, Lat, Long) VALUES($1, $2, $3, $4, $5)'
         const values = [userId, city, state, lat, long]
         pool.query(query, values)
-        .then(result => {
+        .then(() => {
             response.send({
                 success: true
             })
@@ -151,7 +169,7 @@ router.post("/favorite", (request, response) => {
         .catch(error => {
             response.status(400).send({
                 message: "SQL Error",
-                error: error 
+                error: error
             })
         })
     } else {
@@ -161,13 +179,32 @@ router.post("/favorite", (request, response) => {
     }
 })
 
+/**
+ * @api {Delete} /weather/favorite Remove a weather location from user favorites
+ * @apiName DeleteFavoriteWeather
+ * @apiGroup Weather
+ *
+ * @apiHeader {String} authorization Valid JSON Web Token JWT
+ *
+ * @apiParam {String} city favorite location's city
+ * @apiParam {String} state favorite location's state
+ * @apiParam {String} lat favorite location's latitude
+ * @apiParam {String} long favorite location's longitude
+ *
+ * @apiSuccess (Success 200) {JSON} JSON object with success messages
+ *
+ * @apiError (400: Missing Parameters) {String} message "Missing required information"
+ * @apiError (400: SQL Error) {String} message "SQL Error"
+ *
+ * @apiUse JSONError
+ */
 router.delete("/favorite", (request, response) => {
     const userId = request.decoded.memberid
     const city = request.headers.city
     const state = request.headers.state
     const lat = request.headers.lat
     const long = request.headers.long
-    
+
     if(lat && long && city && state) {
         const query = `DELETE FROM LOCATIONS WHERE MemberID=$1 AND CityName=$2 AND StateName=$3
                             AND Lat=$4 AND Long=$5`
@@ -181,7 +218,7 @@ router.delete("/favorite", (request, response) => {
         .catch(error => {
             response.status(400).send({
                 message: "SQL Error",
-                error: error 
+                error: error
             })
         })
     } else {
