@@ -36,11 +36,8 @@ router.use(bodyParser.json())
  * @apiSuccess (Success 201) {String} email the email of the user inserted
  *
  * @apiError (400: Missing Parameters) {String} message "Missing required information"
- *
  * @apiError (400: Username exists) {String} message "Username exists"
- *
  * @apiError (400: Email exists) {String} message "Email exists"
- *
  * @apiError (400: SQL Error) {String} message the reported SQL error details
  */
 router.post('/', (req, res) => {

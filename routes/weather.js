@@ -38,11 +38,8 @@ let validZipcode = require('../utilities/weather_utils').validZipcode
  * @apiSuccess (Success 200) {JSON[]} daily JSON array containing daily weather forecast a week
  * 
  * @apiError (400: Missing Parameters) {String} message "Missing required information"
- *
  * @apiError (400: Weather API Error) {String} message "Axios Error Message"
- *
  * @apiError (400: Malformed lat/long) {String} message "Location not found"
- *
  * @apiError (400: Invalid Zip Code) {String} message "Invalid Zip Code"
  *
  * @apiUse JSONError
@@ -114,7 +111,9 @@ router.get('/location', (req, res) => {
  * @apiHeader {String} Authorization valid JSON Web Token JWT
  * @apiSuccess (Success 200) {JSON[]} favorites JSON array containing the user's favorite locations 
  *
- * @apiError (400: Missing Parameters) {String} message "Missing required information"
+ * @apiSuccess (Success 200) {JSON} JSON object with success messages
+ *
+ * @apiError (400: SQL Error) {String} message "SQL Error"
  *
  * @apiUse JSONError
  */
@@ -132,11 +131,10 @@ router.get("/favorite", (request, response) => {
     .catch(error => {
         response.status(400).send({
             message: "SQL Error",
-            error: error 
+            error: error
         })
     })
 })
-
 
 /**
  * @api {POST} /weather/favorite Add a new location to a user's favorite weather locations
@@ -168,7 +166,7 @@ router.post("/favorite", (request, response) => {
         const query = 'INSERT INTO LOCATIONS(MemberID, CityName, StateName, Lat, Long) VALUES($1, $2, $3, $4, $5)'
         const values = [userId, city, state, lat, long]
         pool.query(query, values)
-        .then(result => {
+        .then(() => {
             response.send({
                 success: true
             })
@@ -176,7 +174,7 @@ router.post("/favorite", (request, response) => {
         .catch(error => {
             response.status(400).send({
                 message: "SQL Error",
-                error: error 
+                error: error
             })
         })
     } else {
@@ -210,7 +208,7 @@ router.delete("/favorite", (request, response) => {
     const state = request.headers.state
     const lat = request.headers.lat
     const long = request.headers.long
-    
+
     if(lat && long && city && state) {
         const query = `DELETE FROM LOCATIONS WHERE MemberID=$1 AND CityName=$2 AND StateName=$3
                             AND Lat=$4 AND Long=$5`
@@ -224,7 +222,7 @@ router.delete("/favorite", (request, response) => {
         .catch(error => {
             response.status(400).send({
                 message: "SQL Error",
-                error: error 
+                error: error
             })
         })
     } else {

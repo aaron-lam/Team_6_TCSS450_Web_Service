@@ -36,7 +36,7 @@ const msg_functions = require('../../utilities/utils').messaging;
  *
  * @apiError (400: SQL Error) {String} message the reported SQL error details
  *
- * @apiError (400: Unknow Chat ID) {String} message "invalid chat id"
+ * @apiError (400: Unknown Chat ID) {String} message "invalid chat id"
  *
  * @apiUse JSONError
  */
@@ -130,7 +130,6 @@ router.post("/", (request, response, next) => {
   pool.query(query, values)
     .then(async result => {
       response.message.username = await getUserName(response.message.email);
-      console.log(response.message);
       result.rows.forEach(entry =>
         msg_functions.sendMessageToIndividual(
           entry.token,
@@ -172,12 +171,12 @@ function getUserName(email) {
  * MessageID.
  *
  * @apiParam {Number} chatId the chat to look up.
- * @apiParam {Number} messageId (Optional) return the 15 messages prior to this message
+ * @apiParam {Number} [messageId] return the 15 messages prior to this message
  *
  * @apiSuccess {Number} rowCount the number of messages returned
  * @apiSuccess {Object[]} messages List of massages in the message table
  * @apiSuccess {String} messages.messageId The id for this message
- * @apiSuccess {String} messages.email The email of the user who poseted this message
+ * @apiSuccess {String} messages.email The email of the user who posted this message
  * @apiSuccess {String} messages.message The message text
  * @apiSuccess {String} messages.timestamp The timestamp of when this message was posted
  *
@@ -203,7 +202,7 @@ router.get("/:chatId?/:messageId?", (request, response, next) => {
     next()
   }
 }, (request, response, next) => {
-  //validate that the ChatId exisits
+  //validate that the ChatId exists
   let query = 'SELECT * FROM CHATS WHERE ChatId=$1';
   let values = [request.params.chatId];
 
