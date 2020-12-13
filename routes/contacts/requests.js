@@ -104,11 +104,8 @@ router.post('/:memberId', (request, response, next) => {
  * @apiSuccess (Success 200) {boolean} success true when the request is denied
  *
  * @apiError (400: Missing Parameters) {String} message "DELETE Missing required information"
- *
  * @apiError (400: Malformed Parameters) {String} message "DELETE Malformed parameter. memberId must be a number"
- *
  * @apiError (400: Invalid request) {String} message "Contact request does not exist."
- *
  * @apiError (400: SQL Error) {String} message the reported SQL error details
  *
  * @apiUse JSONError
@@ -173,7 +170,6 @@ router.delete('/:memberId?', (request, response, next) => {
  * @apiSuccess {String} memberid Contact request's username
  *
  * @apiError (400: No requests) {String} message "No contact requests"
- *
  * @apiError (400: SQL Error) {String} message the reported SQL error details
  *
  * @apiUse JSONError

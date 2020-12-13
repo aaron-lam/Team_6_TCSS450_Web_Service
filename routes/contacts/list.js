@@ -19,13 +19,9 @@ router.use(bodyParser.json())
  * @apiSuccess (Success 200) {boolean} success true when the contact is added
  *
  * @apiError (400: Missing Parameters) {String} message "Missing required information"
- *
  * @apiError (400: Invalid user) {String} message "User does not exist."
- *
  * @apiError (400: Add themselves as contact) {String} message "User is attempting to add themself."
- *
  * @apiError (400: Is contact already) {String} message "You are already contacts with this person."
- *
  * @apiError (400: SQL Error) {String} message the reported SQL error details
  *
  * @apiUse JSONError
@@ -192,22 +188,16 @@ router.post('/', (request, response, next) => {
  * @apiGroup Contacts
  *
  * @apiHeader {String} authorization Valid JSON Web Token JWT
- * @apiParam {String} username (Optional) The username of a user that the user wants to potentially add as a contact
+ * @apiParam {String} [username] The username of a user that the user wants to potentially add as a contact
  *
  * @apiSuccess {Object[]} contacts List of confirmed contacts associated with the requester
- * 
  * @apiSuccess {boolean} Sends "true" if the contact could potentially be added if the user wishes
  *
  * @apiError (400: Invalid user) {String} message "User not found"
- *
  * @apiError (400: Not a contact) {String} message "User is not a contact"
- *
  * @apiError (400: Unconfirmed contact) {String} message "Contact is not confirmed"
- *
  * @apiError (400: Empty contact list) {String} message "No contacts exist"
- *
  * @apiError (400: memberId Error) {String} message "Malformed parameter. memberId must be a number"
- *
  * @apiError (400: SQL Error) {String} message the reported SQL error details
  *
  * @apiUse JSONError
@@ -215,7 +205,7 @@ router.post('/', (request, response, next) => {
 router.get('/:username?', (request, response, next) => {
     // Empty parameter operation
     if (!request.params.username) {
-        let query = 
+        let query =
         `SELECT FirstName, LastName, Username, MemberId 
         FROM Members 
         WHERE MemberID 
@@ -305,13 +295,9 @@ router.get('/:username?', (request, response, next) => {
  * @apiSuccess (Success 200) {boolean} success true when the contact is deleted
  *
  * @apiError (400: Invalid contact) {String} message "User not found"
- *
  * @apiError (400: Unconfirmed contact) {String} message "User is not a contact"
- *
  * @apiError (400: Missing Parameters) {String} message "Missing required information"
- *
  * @apiError (400: memberId Error) {String} message "Malformed parameter. memberId must be a number"
- *
  * @apiError (400: SQL Error) {String} message the reported SQL error details
  *
  * @apiUse JSONError

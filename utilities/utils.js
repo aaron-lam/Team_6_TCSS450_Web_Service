@@ -40,9 +40,6 @@ function getHash(pw, salt) {
     return crypto.createHash("sha256").update(pw + salt).digest("hex")
 }
 
-
-
 module.exports = {
-
     pool, getHash, sendEmail, messaging
 }
