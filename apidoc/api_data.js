@@ -371,7 +371,7 @@ define({ "api": [
     "title": "Request delete a user from a chat",
     "name": "DeleteChats",
     "group": "Chats",
-    "description": "<p>Does not delete the user associated with the required JWT but instead delelets the user based on the email parameter.</p>",
+    "description": "<p>Does not delete the user associated with the required JWT but instead deletes the user based on the email parameter.</p>",
     "parameter": {
       "fields": {
         "Parameter": [
@@ -956,6 +956,104 @@ define({ "api": [
     "groupTitle": "Chats"
   },
   {
+    "type": "post",
+    "url": "/contactRequests/:memberId",
+    "title": "Request to add a new contact",
+    "name": "ConfirmContactRequest",
+    "group": "ContactRequests",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "authorization",
+            "description": "<p>Valid JSON Web Token JWT</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "memberId",
+            "description": "<p>the memberId of the user you are confirming as a contact</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "boolean",
+            "optional": false,
+            "field": "success",
+            "description": "<p>true or false based on whether they were successfully added or not</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "400: Missing Info": [
+          {
+            "group": "400: Missing Info",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;Missing required information&quot;</p>"
+          }
+        ],
+        "400: Not a Number": [
+          {
+            "group": "400: Not a Number",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;Malformed parameter. memberId must be a number&quot;</p>"
+          }
+        ],
+        "400: Invalid Contact Request": [
+          {
+            "group": "400: Invalid Contact Request",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;Contact request does not exist.&quot;</p>"
+          }
+        ],
+        "400: SQL Error": [
+          {
+            "group": "400: SQL Error",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>the reported SQL error details</p>"
+          }
+        ],
+        "400: JSON Error": [
+          {
+            "group": "400: JSON Error",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;malformed JSON in parameters&quot;</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/contacts/requests.js",
+    "groupTitle": "ContactRequests"
+  },
+  {
     "type": "delete",
     "url": "/contactRequests",
     "title": "Deny a request",
@@ -1135,104 +1233,6 @@ define({ "api": [
     "groupTitle": "ContactRequests"
   },
   {
-    "type": "post",
-    "url": "/contactRequests",
-    "title": "Confirm a request",
-    "name": "PostContactRequests",
-    "group": "ContactRequests",
-    "header": {
-      "fields": {
-        "Header": [
-          {
-            "group": "Header",
-            "type": "String",
-            "optional": false,
-            "field": "authorization",
-            "description": "<p>Valid JSON Web Token JWT</p>"
-          }
-        ]
-      }
-    },
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "Number",
-            "optional": false,
-            "field": "memberId",
-            "description": "<p>username the contact's user ID number</p>"
-          }
-        ]
-      }
-    },
-    "success": {
-      "fields": {
-        "Success 200": [
-          {
-            "group": "Success 200",
-            "type": "boolean",
-            "optional": false,
-            "field": "success",
-            "description": "<p>true when the request is confirmed</p>"
-          }
-        ]
-      }
-    },
-    "error": {
-      "fields": {
-        "400: Missing Parameters": [
-          {
-            "group": "400: Missing Parameters",
-            "type": "String",
-            "optional": false,
-            "field": "message",
-            "description": "<p>&quot;POST Missing required information&quot;</p>"
-          }
-        ],
-        "400: Malformed Parameters": [
-          {
-            "group": "400: Malformed Parameters",
-            "type": "String",
-            "optional": false,
-            "field": "message",
-            "description": "<p>&quot;POST Malformed parameter. memberId must be a number&quot;</p>"
-          }
-        ],
-        "400: Invalid request": [
-          {
-            "group": "400: Invalid request",
-            "type": "String",
-            "optional": false,
-            "field": "message",
-            "description": "<p>&quot;Contact request does not exist.&quot;</p>"
-          }
-        ],
-        "400: SQL Error": [
-          {
-            "group": "400: SQL Error",
-            "type": "String",
-            "optional": false,
-            "field": "message",
-            "description": "<p>the reported SQL error details</p>"
-          }
-        ],
-        "400: JSON Error": [
-          {
-            "group": "400: JSON Error",
-            "type": "String",
-            "optional": false,
-            "field": "message",
-            "description": "<p>&quot;malformed JSON in parameters&quot;</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "routes/contacts/requests.js",
-    "groupTitle": "ContactRequests"
-  },
-  {
     "type": "delete",
     "url": "/contacts/:memberId?",
     "title": "Request to delete a contact",
@@ -1363,10 +1363,10 @@ define({ "api": [
         "Parameter": [
           {
             "group": "Parameter",
-            "type": "Number",
-            "optional": false,
-            "field": "memberId",
-            "description": "<p>(Optional) the contact's user ID number.  If no number provided, all are contacts returned</p>"
+            "type": "String",
+            "optional": true,
+            "field": "username",
+            "description": "<p>The username of a user that the user wants to potentially add as a contact</p>"
           }
         ]
       }
@@ -1383,24 +1383,10 @@ define({ "api": [
           },
           {
             "group": "Success 200",
-            "type": "String",
+            "type": "boolean",
             "optional": false,
-            "field": "first",
-            "description": "<p>requested contact's first name</p>"
-          },
-          {
-            "group": "Success 200",
-            "type": "String",
-            "optional": false,
-            "field": "last",
-            "description": "<p>requested contact's last name</p>"
-          },
-          {
-            "group": "Success 200",
-            "type": "String",
-            "optional": false,
-            "field": "username",
-            "description": "<p>requested contact's username</p>"
+            "field": "Sends",
+            "description": "<p>&quot;true&quot; if the contact could potentially be added if the user wishes</p>"
           }
         ]
       }
@@ -1603,9 +1589,9 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "Number",
-            "optional": false,
+            "optional": true,
             "field": "messageId",
-            "description": "<p>(Optional) return the 15 messages prior to this message</p>"
+            "description": "<p>return the 15 messages prior to this message</p>"
           }
         ]
       }
@@ -1639,7 +1625,7 @@ define({ "api": [
             "type": "String",
             "optional": false,
             "field": "messages.email",
-            "description": "<p>The email of the user who poseted this message</p>"
+            "description": "<p>The email of the user who posted this message</p>"
           },
           {
             "group": "Success 200",
@@ -1793,9 +1779,9 @@ define({ "api": [
             "description": "<p>the reported SQL error details</p>"
           }
         ],
-        "400: Unknow Chat ID": [
+        "400: Unknown Chat ID": [
           {
-            "group": "400: Unknow Chat ID",
+            "group": "400: Unknown Chat ID",
             "type": "String",
             "optional": false,
             "field": "message",
@@ -2034,6 +2020,165 @@ define({ "api": [
     "groupTitle": "Verification"
   },
   {
+    "type": "Delete",
+    "url": "/weather/favorite",
+    "title": "Remove a weather location from user favorites",
+    "name": "DeleteFavoriteWeather",
+    "group": "Weather",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "authorization",
+            "description": "<p>Valid JSON Web Token JWT</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "city",
+            "description": "<p>favorite location's city</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "state",
+            "description": "<p>favorite location's state</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "lat",
+            "description": "<p>favorite location's latitude</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "long",
+            "description": "<p>favorite location's longitude</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "JSON",
+            "optional": false,
+            "field": "JSON",
+            "description": "<p>object with success messages</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "400: Missing Parameters": [
+          {
+            "group": "400: Missing Parameters",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;Missing required information&quot;</p>"
+          }
+        ],
+        "400: SQL Error": [
+          {
+            "group": "400: SQL Error",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;SQL Error&quot;</p>"
+          }
+        ],
+        "400: JSON Error": [
+          {
+            "group": "400: JSON Error",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;malformed JSON in parameters&quot;</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/weather.js",
+    "groupTitle": "Weather"
+  },
+  {
+    "type": "Get",
+    "url": "/weather/favorite",
+    "title": "Request a user's favorite weather locations",
+    "name": "GetFavoriteWeather",
+    "group": "Weather",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "authorization",
+            "description": "<p>Valid JSON Web Token JWT</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "JSON",
+            "optional": false,
+            "field": "JSON",
+            "description": "<p>object with success messages</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "400: SQL Error": [
+          {
+            "group": "400: SQL Error",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;SQL Error&quot;</p>"
+          }
+        ],
+        "400: JSON Error": [
+          {
+            "group": "400: JSON Error",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;malformed JSON in parameters&quot;</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/weather.js",
+    "groupTitle": "Weather"
+  },
+  {
     "type": "Get",
     "url": "/weather/location",
     "title": "Request weather data based on a lat/long",
@@ -2115,6 +2260,107 @@ define({ "api": [
             "optional": false,
             "field": "message",
             "description": "<p>&quot;Invalid Zip Code&quot;</p>"
+          }
+        ],
+        "400: JSON Error": [
+          {
+            "group": "400: JSON Error",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;malformed JSON in parameters&quot;</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/weather.js",
+    "groupTitle": "Weather"
+  },
+  {
+    "type": "Post",
+    "url": "/weather/favorite",
+    "title": "Add a weather location into user favorites",
+    "name": "PostFavoriteWeather",
+    "group": "Weather",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "authorization",
+            "description": "<p>Valid JSON Web Token JWT</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "city",
+            "description": "<p>favorite location's city</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "state",
+            "description": "<p>favorite location's state</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "lat",
+            "description": "<p>favorite location's latitude</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "long",
+            "description": "<p>favorite location's longitude</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "JSON",
+            "optional": false,
+            "field": "JSON",
+            "description": "<p>object with success messages</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "400: Missing Parameters": [
+          {
+            "group": "400: Missing Parameters",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;Missing required information&quot;</p>"
+          }
+        ],
+        "400: SQL Error": [
+          {
+            "group": "400: SQL Error",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;SQL Error&quot;</p>"
           }
         ],
         "400: JSON Error": [

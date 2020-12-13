@@ -10,7 +10,7 @@ const router = express.Router()
 
 router.use(express.json())
 
-//Pull in the JWT module along with out asecret key
+//Pull in the JWT module along with out a secret key
 let jwt = require('jsonwebtoken')
 let config = {
   secret: process.env.JSON_WEB_TOKEN
@@ -28,15 +28,11 @@ let config = {
  * @apiSuccess {String} token JSON Web Token
  *
  * @apiError (400: Missing Parameters) {String} message "Missing required information"
- *
  * @apiError (404: User Not Found) {String} message "User not found"
- *
  * @apiError (400: Invalid Credentials) {String} message "Credentials did not match"
- *
  * @apiError (400: SQL Error) {String} message the reported SQL error details
  */
 router.get('/', (request, response) => {
-
   if (!request.headers.authorization || request.headers.authorization.indexOf('Basic ') === -1) {
     return response.status(401).json({ message: 'Missing Authorization Header' })
   }

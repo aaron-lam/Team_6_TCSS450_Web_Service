@@ -18,7 +18,7 @@ function validateEmail(email) {
     }
 
     illegalChars = ['+', '"', ",", " "]
-    
+
     illegalChars.forEach(char => {
         if(local.includes(char)) return `${char} cannot be present before @`
     })
@@ -33,7 +33,6 @@ function validateName(name, type) {
     if(!nameRegex.test(name)) return `${type} must contain letters with no spaces`
 }
 
-
 function validatePassword(password) {
     if(password.length < 1) {
         return 'Password cannot be empty'
@@ -41,13 +40,11 @@ function validatePassword(password) {
         return 'Password must be at least 6 characters long'
     } else {
         if(!(/[.*@!#%&()^~{}]+/.test(password))) return 'Password must contain a special character'
-        if(!(/[A-Z]+/.test(password))) return 'Password must contain an uppercase character' 
+        if(!(/[A-Z]+/.test(password))) return 'Password must contain an uppercase character'
         if(!(/[a-z]+/.test(password))) return 'Password must contain a lowercase character'
         if(!(/[0-9]/.test(password))) return 'Password must contain a number'
     }
 }
-
-
 
 module.exports = {
     validateEmail, validateName, validatePassword
