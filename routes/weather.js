@@ -5,7 +5,6 @@ const router = express.Router()
 router.use(express.json())
 
 const pool = require('../utilities/utils').pool
-const bodyParser = require("body-parser")
 
 const axios = require('axios')
 const zipcodes = require('zipcodes')
@@ -22,16 +21,22 @@ let validZipcode = require('../utilities/weather_utils').validZipcode
  */
 
 /**
- * @api {Get} /weather/location Request weather data based on a lat/long
+ * @api {Get} /weather/location Request weather data based on a lat/long or zipcode
  * @apiName GetWeather
  * @apiGroup Weather
  *
+ * @apiHeader {String} Authorization valid JSON Web Token JWT
  * @apiHeader {Number} lat Latitude
  * @apiHeader {Number} long Longitude
  * @apiHeader {Number} zipcode zip code
  *
- * @apiSuccess (Success 200) {JSON} weather object containing data for the week
- *
+ * @apiSuccess (Success 200) {Number} latitude Latitude of the Weather Data
+ * @apiSuccess (Success 200) {Number} longitude Longitude of the Weather Data
+ * @apiSuccess (Success 200) {String} city City of the Weather Data
+ * @apiSuccess (Success 200) {String} state State of the Weather Data
+ * @apiSuccess (Success 200) {JSON[]} forecast JSON array containing hourly data for 48-hours
+ * @apiSuccess (Success 200) {JSON[]} daily JSON array containing daily weather forecast a week
+ * 
  * @apiError (400: Missing Parameters) {String} message "Missing required information"
  * @apiError (400: Weather API Error) {String} message "Axios Error Message"
  * @apiError (400: Malformed lat/long) {String} message "Location not found"
@@ -100,10 +105,11 @@ router.get('/location', (req, res) => {
 
 /**
  * @api {Get} /weather/favorite Request a user's favorite weather locations
- * @apiName GetFavoriteWeather
- * @apiGroup Weather
+ * @apiName GetFavoriteLocation
+ * @apiGroup Favorite Location
  *
- * @apiHeader {String} authorization Valid JSON Web Token JWT
+ * @apiHeader {String} Authorization valid JSON Web Token JWT
+ * @apiSuccess (Success 200) {JSON[]} favorites JSON array containing the user's favorite locations 
  *
  * @apiSuccess (Success 200) {JSON} JSON object with success messages
  *
@@ -131,21 +137,20 @@ router.get("/favorite", (request, response) => {
 })
 
 /**
- * @api {Post} /weather/favorite Add a weather location into user favorites
- * @apiName PostFavoriteWeather
- * @apiGroup Weather
+ * @api {POST} /weather/favorite Add a new location to a user's favorite weather locations
+ * @apiName PostFavoriteLocation
+ * @apiGroup Favorite Location
  *
- * @apiHeader {String} authorization Valid JSON Web Token JWT
+ * @apiHeader {String} Authorization valid JSON Web Token JWT
+ * @apiParam {String} City City of the location to delete
+ * @apiParam {String} City State of the location to delete
+ * @apiParam {Number} Longitude Latitude of location to delete 
+ * @apiParam {Number} Longitude Longitude of location to delete  
+ * 
+ * @apiSuccess (Success 200) {Boolean} success true When the location was successful inserted 
  *
- * @apiParam {String} city favorite location's city
- * @apiParam {String} state favorite location's state
- * @apiParam {String} lat favorite location's latitude
- * @apiParam {String} long favorite location's longitude
- *
- * @apiSuccess (Success 200) {JSON} JSON object with success messages
- *
- * @apiError (400: Missing Parameters) {String} message "Missing required information"
  * @apiError (400: SQL Error) {String} message "SQL Error"
+ * @apiError (400: Missing Parameters) {String} message "Missing required information"
  *
  * @apiUse JSONError
  */
@@ -180,21 +185,20 @@ router.post("/favorite", (request, response) => {
 })
 
 /**
- * @api {Delete} /weather/favorite Remove a weather location from user favorites
- * @apiName DeleteFavoriteWeather
- * @apiGroup Weather
+ * @api {DELETE} /weather/favorite Delete a location from user's favorite weather locations
+ * @apiName DeleteFavoriteLocation
+ * @apiGroup Favorite Location
  *
- * @apiHeader {String} authorization Valid JSON Web Token JWT
+ * @apiHeader {String} Authorization valid JSON Web Token JWT
+ * @apiHeader {String} City City of the location to delete
+ * @apiHeader {String} State State(Abbreviation) of the location to delete
+ * @apiHeader {Number} Latitude Latitude of location to delete
+ * @apiHeader {Number} Longitude Longitude of location to delete 
+ * 
+ * @apiSuccess (Success 200) {Boolean} success true When the location was successfully deleted
  *
- * @apiParam {String} city favorite location's city
- * @apiParam {String} state favorite location's state
- * @apiParam {String} lat favorite location's latitude
- * @apiParam {String} long favorite location's longitude
- *
- * @apiSuccess (Success 200) {JSON} JSON object with success messages
- *
- * @apiError (400: Missing Parameters) {String} message "Missing required information"
  * @apiError (400: SQL Error) {String} message "SQL Error"
+ * @apiError (400: Missing Parameters) {String} message "Missing required information"
  *
  * @apiUse JSONError
  */
