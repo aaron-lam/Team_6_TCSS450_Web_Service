@@ -7,7 +7,7 @@ const router = express.Router();
 const { sendEmail } = require("../../../utilities/utils");
 
 /**
- * @api {get} /password/reset Request to reset a password
+ * @api {put} /password/reset Request to reset a password
  * @apiName GetPasswordReset
  * @apiGroup Password
  *
@@ -19,8 +19,8 @@ const { sendEmail } = require("../../../utilities/utils");
  * @apiError (400: Missing Parameters) {String} message "Missing required information"
  * @apiError (400: Email not exists) {String} message "Email not exists"
  */
-router.get('/', (req, res) => {
-  const email = req.query.email;
+router.put('/', (req, res) => {
+  const email = req.body.email;
   if (email) {
     const theQuery = "SELECT Verification_Code, Verification FROM Members WHERE Email=$1";
     const values = [email];
